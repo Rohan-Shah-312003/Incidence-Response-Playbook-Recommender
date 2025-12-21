@@ -1,0 +1,72 @@
+[
+  {
+    "action_id": "IR-ID-01",
+    "action_name": "Confirm incident scope and impact",
+    "phase": "Identification",
+    "incident_types": ["Malware", "Ransomware", "Data Breach", "Insider Misuse"],
+    "description": "Determine the extent of the incident and identify affected systems, users, and data.",
+    "implementation_guidance": "Review incident reports, interview users, and validate alerts. Avoid making containment changes until scope is understood.",
+    "risk_if_skipped": "Incomplete response may leave affected assets unidentified.",
+    "estimated_time": "15–30 minutes"
+  },
+  {
+    "action_id": "IR-ID-02",
+    "action_name": "Identify affected assets",
+    "phase": "Identification",
+    "incident_types": ["Malware", "Ransomware", "DoS"],
+    "description": "Create an inventory of all systems impacted by the incident.",
+    "implementation_guidance": "Use asset inventory records and incident reports to list affected endpoints, servers, or network components.",
+    "risk_if_skipped": "Unidentified assets may remain compromised.",
+    "estimated_time": "10–20 minutes"
+  },
+  {
+    "action_id": "IR-CON-01",
+    "action_name": "Isolate affected host from network",
+    "phase": "Containment",
+    "incident_types": ["Malware", "Ransomware"],
+    "description": "Prevent lateral movement by disconnecting the affected system from the network.",
+    "implementation_guidance": "Disable network interfaces or physically disconnect cables. Do not power off the system.",
+    "risk_if_skipped": "Threat may spread to other systems.",
+    "estimated_time": "5–10 minutes"
+  },
+  {
+    "action_id": "IR-CON-02",
+    "action_name": "Disable compromised user account",
+    "phase": "Containment",
+    "incident_types": ["Phishing", "Insider Misuse", "Data Breach"],
+    "description": "Disable accounts suspected of being compromised to prevent misuse.",
+    "implementation_guidance": "Temporarily disable the account in IAM or directory services.",
+    "risk_if_skipped": "Attacker may continue unauthorized access.",
+    "estimated_time": "5 minutes"
+  },
+  {
+    "action_id": "IR-ERA-01",
+    "action_name": "Remove identified malicious binaries",
+    "phase": "Eradication",
+    "incident_types": ["Malware", "Ransomware"],
+    "description": "Delete malware files and associated artifacts from affected systems.",
+    "implementation_guidance": "Use trusted antivirus or manual file removal after evidence collection.",
+    "risk_if_skipped": "Malware may re-execute after containment.",
+    "estimated_time": "20–40 minutes"
+  },
+  {
+    "action_id": "IR-REC-01",
+    "action_name": "Restore system from known good backup",
+    "phase": "Recovery",
+    "incident_types": ["Ransomware"],
+    "description": "Recover affected systems using verified clean backups.",
+    "implementation_guidance": "Ensure backups predate the incident and verify integrity before restoring.",
+    "risk_if_skipped": "Data loss or reinfection risk.",
+    "estimated_time": "30–90 minutes"
+  },
+  {
+    "action_id": "IR-POST-01",
+    "action_name": "Conduct root cause analysis",
+    "phase": "Post-Incident",
+    "incident_types": ["Malware", "Ransomware", "Data Breach", "Insider Misuse"],
+    "description": "Analyze how the incident occurred to prevent recurrence.",
+    "implementation_guidance": "Review logs, timelines, and system changes leading to the incident.",
+    "risk_if_skipped": "Same attack vector may be reused.",
+    "estimated_time": "1–2 hours"
+  }
+]
