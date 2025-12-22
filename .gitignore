@@ -1,0 +1,7 @@
+.venv/
+cert_raw/
+enron_raw/
+cert_processed/
+enron_processed/
+__pycache__
+real_incidents.csv
