@@ -1,3 +1,6 @@
+# =============================================================
+# Merging enron and CERT dataset
+# =============================================================
 import pandas as pd
 
 CERT_PATH = "./data/cert_processed/cert_incidents.csv"

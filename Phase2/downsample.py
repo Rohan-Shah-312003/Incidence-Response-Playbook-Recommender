@@ -1,3 +1,8 @@
+# ========================================================================
+# For downsampling the real dataset to 
+# prevent overtraining and overfitting of model
+# ========================================================================
+
 import pandas as pd
 
 INPUT = "./data/real_incidents.csv"

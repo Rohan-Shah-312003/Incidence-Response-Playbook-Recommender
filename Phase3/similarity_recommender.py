@@ -71,7 +71,7 @@ if __name__ == "__main__":
     An admin mentioned facing problems in logging in their employee-only portal.
     The admin password was only known by one of their close friends.
     """
-
+        
     print("\n[+] New Incident:")
     print(new_incident.strip())
 

@@ -6,10 +6,7 @@ from email.parser import Parser
 RAW_ENRON_PATH = "./data/enron_raw/enron_emails.csv"
 OUTPUT_PATH = "./data/enron_processed/enron_incidents.csv"
 
-# -------------------------------------------------
 # CLEAN TEXT
-# -------------------------------------------------
-
 def clean_text(text):
     text = text.lower()
     text = re.sub(r"http\S+", " ", text)
@@ -17,10 +14,7 @@ def clean_text(text):
     text = re.sub(r"\s+", " ", text)
     return text.strip()
 
-# -------------------------------------------------
 # EXTRACT EMAIL BODY FROM RAW MESSAGE
-# -------------------------------------------------
-
 def extract_body(raw_message):
     try:
         email = Parser(policy=policy.default).parsestr(raw_message)
@@ -40,10 +34,7 @@ def extract_body(raw_message):
     except Exception:
         return ""
 
-# -------------------------------------------------
 # WEAK LABELING
-# -------------------------------------------------
-
 def assign_label(text):
     phishing_terms = [
         "password", "login", "verify", "click", "credentials", "urgent"
@@ -65,10 +56,7 @@ def assign_label(text):
 
     return None
 
-# -------------------------------------------------
 # MAIN PIPELINE
-# -------------------------------------------------
-
 def preprocess_enron():
     df = pd.read_csv(RAW_ENRON_PATH)
 
