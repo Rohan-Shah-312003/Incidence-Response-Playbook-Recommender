@@ -6,3 +6,5 @@ enron_processed/
 __pycache__
 real_incidents.csv
 .env
+node_modules/
+package-lock.json
