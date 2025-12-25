@@ -1,0 +1,89 @@
+{
+  "IR-ID-01": {
+    "action_name": "Confirm incident scope",
+    "phase": "Identification",
+    "description": "Determine the extent of the incident, affected users, systems, and time range.",
+    "implementation_guidance": "Review reported email content, headers, timestamps, affected accounts, and any related alerts or logs to understand how far the incident may have spread.",
+    "risk_if_skipped": "Underestimating scope may result in incomplete containment and continued compromise."
+  },
+
+  "IR-ID-02": {
+    "action_name": "Preserve incident evidence",
+    "phase": "Identification",
+    "description": "Preserve relevant evidence for investigation and potential escalation.",
+    "implementation_guidance": "Secure copies of emails, logs, and affected system data. Avoid modifying original artifacts until evidence is preserved.",
+    "risk_if_skipped": "Loss of evidence may prevent root cause analysis or compliance investigations."
+  },
+
+  "IR-CON-01": {
+    "action_name": "Isolate affected system or account",
+    "phase": "Containment",
+    "description": "Prevent further spread or misuse by isolating impacted assets.",
+    "implementation_guidance": "Temporarily disable affected user accounts or isolate systems from the network without powering them off.",
+    "risk_if_skipped": "Attackers may continue lateral movement or data access."
+  },
+
+  "IR-CON-02": {
+    "action_name": "Disable compromised account",
+    "phase": "Containment",
+    "description": "Immediately stop unauthorized access using exposed credentials.",
+    "implementation_guidance": "Disable the account, reset credentials, invalidate active sessions, and enforce reauthentication.",
+    "risk_if_skipped": "Compromised credentials may continue to be abused."
+  },
+
+  "IR-CON-03": {
+    "action_name": "Notify affected user",
+    "phase": "Containment",
+    "description": "Inform the affected user about the incident and required actions.",
+    "implementation_guidance": "Advise the user not to interact further with the suspicious content and to report any additional anomalies.",
+    "risk_if_skipped": "User may unknowingly worsen the incident or repeat unsafe behavior."
+  },
+
+  "IR-ERAD-01": {
+    "action_name": "Remove malicious artifacts",
+    "phase": "Eradication",
+    "description": "Eliminate malicious content or access paths from the environment.",
+    "implementation_guidance": "Delete phishing emails from mailboxes, revoke malicious links, and remove unauthorized access tokens.",
+    "risk_if_skipped": "Residual artifacts may re-trigger compromise."
+  },
+
+  "IR-ERAD-02": {
+    "action_name": "Reset credentials and access keys",
+    "phase": "Eradication",
+    "description": "Ensure previously exposed credentials can no longer be used.",
+    "implementation_guidance": "Force password resets, rotate access keys, and review privileged access assignments.",
+    "risk_if_skipped": "Attackers may regain access using unchanged credentials."
+  },
+
+  "IR-REC-01": {
+    "action_name": "Validate system integrity",
+    "phase": "Recovery",
+    "description": "Confirm that affected systems and accounts are operating securely.",
+    "implementation_guidance": "Monitor logs, validate authentication behavior, and ensure no unauthorized changes persist.",
+    "risk_if_skipped": "Undetected persistence mechanisms may remain active."
+  },
+
+  "IR-REC-02": {
+    "action_name": "Restore normal operations",
+    "phase": "Recovery",
+    "description": "Safely return systems and users to normal operational status.",
+    "implementation_guidance": "Re-enable accounts or systems after validation and ensure users can resume work securely.",
+    "risk_if_skipped": "Prolonged disruption or insecure restoration may occur."
+  },
+
+  "IR-POST-01": {
+    "action_name": "Conduct post-incident review",
+    "phase": "Post-Incident",
+    "description": "Analyze the incident, response effectiveness, and identify lessons learned.",
+    "implementation_guidance": "Document incident timeline, assess response gaps, and update incident response procedures.",
+    "risk_if_skipped": "Recurring incidents may occur due to unresolved weaknesses."
+  },
+
+  "IR-POST-02": {
+    "action_name": "Update security awareness and controls",
+    "phase": "Post-Incident",
+    "description": "Reduce likelihood of similar incidents in the future.",
+    "implementation_guidance": "Update training materials, refine email filtering rules, and improve authentication controls if necessary.",
+    "risk_if_skipped": "Same attack patterns may succeed again."
+  }
+}

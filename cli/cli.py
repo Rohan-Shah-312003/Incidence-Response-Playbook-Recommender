@@ -12,6 +12,6 @@ if __name__ == "__main__":
     print("\nIncident Type:", output["incident_type"])
     print("\nRecommended Actions:\n")
 
-    for action, explanation in output["explanations"].items():
-        print("="*50)
+    for aid, explanation in output["explanations"].items():
+        print("=" * 60)
         print(explanation)

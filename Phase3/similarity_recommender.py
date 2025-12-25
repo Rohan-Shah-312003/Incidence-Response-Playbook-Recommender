@@ -1,58 +1,59 @@
 import pandas as pd
+import joblib
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.feature_extraction.text import TfidfVectorizer
+
+DATA_PATH = "./data/real_incidents_balanced.csv"
+VECTORIZER_PATH = "./models/tfidf.pkl"
+
+vectorizer = joblib.load(VECTORIZER_PATH)
+df = pd.read_csv(DATA_PATH)
+X_hist = vectorizer.transform(df["text"])
 
 ACTION_MAP = {
     "Phishing": ["IR-ID-01", "IR-CON-02", "IR-POST-01"],
     "Insider Misuse": ["IR-ID-01", "IR-CON-02", "IR-POST-01"],
-    "Data Breach": ["IR-ID-01", "IR-CON-01", "IR-POST-01"]
+    "Data Breach": ["IR-ID-01", "IR-CON-01", "IR-POST-01"],
 }
 
-class SimilarityRecommender:
-    def __init__(self, df):
-        self.df = df
 
-        self.vectorizer = TfidfVectorizer(
-            stop_words="english",
-            ngram_range=(1, 2),
-            min_df=3
-        )
+def recommend_actions(text: str, top_k: int = 5):
+    x_new = vectorizer.transform([text])
+    similarities = cosine_similarity(x_new, X_hist)[0]
 
-        self.X = self.vectorizer.fit_transform(df["text"])
+    top_idx = similarities.argsort()[-top_k:][::-1]
+    total_sim = sum(similarities[i] for i in top_idx)
 
-    def recommend(self, new_text, top_k=5):
-        x_new = self.vectorizer.transform([new_text])
-        similarities = cosine_similarity(x_new, self.X)[0]
+    action_scores = {}
+    # supporting_incidents = []
 
-        top_idx = similarities.argsort()[-top_k:][::-1]
+    total_similarity = 0.0
 
-        action_scores = {}
-        supporting_incidents = []
+    for idx in top_idx:
+        label = df.iloc[idx]["incident_type"]
+        sim = similarities[idx]
+        # text = df.iloc[idx]["text"][:120] + "..."
 
-        total_similarity = 0.0
+        # supporting_incidents.append((label, sim, text))
+        # total_similarity += sim
 
-        for idx in top_idx:
-            sim = similarities[idx]
-            label = self.df.iloc[idx]["incident_type"]
-            text = self.df.iloc[idx]["text"][:120] + "..."
+        for action in ACTION_MAP.get(label, []):
+            action_scores[action] = action_scores.get(action, 0) + sim
 
-            supporting_incidents.append((label, sim, text))
-            total_similarity += sim
+    # 🔑 Normalize action scores
+    return sorted(
+        [(action, score / total_sim) for action, score in action_scores.items()],
+        key=lambda x: x[1],
+        reverse=True,
+    )
+    # normalized_actions = []
+    # for action, score in action_scores.items():
+    #     confidence = score / total_similarity if total_similarity > 0 else 0
+    #     normalized_actions.append((action, confidence))
 
-            for action in ACTION_MAP.get(label, []):
-                action_scores[action] = action_scores.get(action, 0) + sim
+    # # Sort by confidence
+    # normalized_actions.sort(key=lambda x: x[1], reverse=True)
 
-        # 🔑 Normalize action scores
-        normalized_actions = []
-        for action, score in action_scores.items():
-            confidence = score / total_similarity if total_similarity > 0 else 0
-            normalized_actions.append((action, confidence))
-
-        # Sort by confidence
-        normalized_actions.sort(key=lambda x: x[1], reverse=True)
-
-        return normalized_actions, supporting_incidents
-
+    # return normalized_actions, supporting_incidents
 
 
 # demo testing:
@@ -71,7 +72,7 @@ if __name__ == "__main__":
     An admin mentioned facing problems in logging in their employee-only portal.
     The admin password was only known by one of their close friends.
     """
-        
+
     print("\n[+] New Incident:")
     print(new_incident.strip())
 
