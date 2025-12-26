@@ -1,47 +1,97 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <title>IRPR – Incident Response Assistant</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #0f172a;
-      color: #e5e7eb;
-    }
-    textarea {
-      width: 100%;
-      height: 120px;
-      font-size: 14px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .result {
-      margin-top: 20px;
-      white-space: pre-wrap;
-      background: #020617;
-      padding: 15px;
-      border-radius: 5px;
-    }
-  </style>
-</head>
+	<head>
+		<meta charset="UTF-8" />
+		<title>IRPR – Incident Response Assistant</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				padding: 20px;
+				background: #0f172a;
+				color: #e5e7eb;
+			}
+			textarea {
+				width: 100%;
+				height: 120px;
+				font-size: 14px;
+			}
+			button {
+				margin-top: 10px;
+				padding: 10px 20px;
+				font-size: 16px;
+				cursor: pointer;
+			}
+			.result {
+				margin-top: 20px;
+				white-space: pre-wrap;
+				background: #020617;
+				padding: 15px;
+				border-radius: 5px;
+			}
+			.tabs {
+				margin-top: 20px;
+			}
 
-<body>
-  <h2>Incident Response Decision Support</h2>
+			.tab-btn {
+				background: #1e293b;
+				color: #e5e7eb;
+				border: none;
+				padding: 10px 15px;
+				cursor: pointer;
+				margin-right: 5px;
+			}
 
-  <textarea id="incidentInput"
-    placeholder="Paste incident description here..."></textarea>
+			.tab-btn.active {
+				background: #334155;
+			}
 
-  <br />
-  <button onclick="analyze()">Analyze Incident</button>
+			.tab-content {
+				display: none;
+				margin-top: 15px;
+				padding: 15px;
+				background: #020617;
+				border-radius: 5px;
+				white-space: pre-wrap;
+			}
 
-  <div id="output" class="result"></div>
+			.tab-content.active {
+				display: block;
+			}
+		</style>
+	</head>
 
-  <script src="renderer.js"></script>
-</body>
+	<body>
+		<h2>IRPR – Incident Response Assistant</h2>
+
+		<textarea
+			id="incidentInput"
+			placeholder="Paste incident description here..."
+		></textarea>
+
+		<br />
+		<button onclick="analyze()">Analyze Incident</button>
+
+		<!-- Tabs -->
+		<div class="tabs">
+			<button class="tab-btn active" onclick="openTab('situation')">
+				Situation
+			</button>
+			<button class="tab-btn" onclick="openTab('plan')">
+				Response Plan
+			</button>
+			<button class="tab-btn" onclick="openTab('rationale')">
+				Rationale
+			</button>
+			<button class="tab-btn" onclick="openTab('evidence')">
+				Evidence
+			</button>
+		</div>
+
+		<div id="situation" class="tab-content active"></div>
+		<div id="plan" class="tab-content"></div>
+		<div id="rationale" class="tab-content"></div>
+		<div id="evidence" class="tab-content"></div>
+
+		<script src="renderer.js"></script>
+	</body>
 </html>

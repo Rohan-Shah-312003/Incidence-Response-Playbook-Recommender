@@ -1,53 +1,74 @@
 import json
 from groq import Groq
-from core.validator import validate_action_kb
-from app.config import ENABLE_LLM
-from core.similarity import ACTION_MAP
-
 
 client = Groq()
 
-with open("./knowledge/action_kb.json") as f:
+with open("knowledge/action_kb.json") as f:
     ACTION_KB = json.load(f)
 
-validate_action_kb(ACTION_KB, ACTION_MAP)
-
-
-
-def explain_actions(incident_text: str, actions):
+def explain_actions(incident_text: str, actions: list):
     explanations = {}
 
-    for action_id, confidence in actions:
-        action = ACTION_KB[action_id]
-        if not ENABLE_LLM:
-            return f"[LLM disabled] Action: {action['action_name']}"
+    for action in actions:
+        action_id = action["action_id"]
+        confidence = action["confidence"]
+
+        if action_id not in ACTION_KB:
+            raise RuntimeError(
+                f"Action '{action_id}' missing from action_kb.json"
+            )
+
+        action_meta = ACTION_KB[action_id]
 
         prompt = f"""
-You are an incident response assistant.
+            You are assisting a security analyst.
 
-ONLY explain the provided action.
+            Constraints:
+            - ONLY explain the provided response action
+            - Do NOT suggest new actions
+            - Do NOT invent procedures or tools
 
-Incident:
-{incident_text}
+            Incident context:
+            {incident_text}
 
-Action:
-{action["action_name"]} (confidence {confidence:.2f})
+            Model assessment:
+            Predicted incident type: {action_meta['phase']}
+            Classification confidence: {confidence:.2f}
 
-Description:
-{action["description"]}
+            Operational context:
+            - Activity occurred outside normal business hours
+            - Legitimate system usage is expected to be low
+            - Monitoring and staffing may be reduced
 
-Implementation guidance:
-{action["implementation_guidance"]}
+            Action under explanation:
+            Action name: {action_meta['action_name']}
+            Response phase: {action_meta['phase']}
 
-Risk if skipped:
-{action["risk_if_skipped"]}
-"""
+            Action knowledge:
+            Description:
+            {action_meta['description']}
+
+            Implementation guidance:
+            {action_meta['implementation_guidance']}
+
+            Risk if skipped:
+            {action_meta['risk_if_skipped']}
+
+            Task:
+            Explain clearly:
+            1. Why this action is relevant for this incident
+            2. Why it should be performed at this stage of the response
+            3. Why delaying this action could increase risk in this context
+
+            Keep the explanation concise, professional, and cautious.
+        """
+
 
         completion = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1,
-            max_tokens=250,
+            # max_tokens=300
         )
 
         explanations[action_id] = completion.choices[0].message.content.strip()
