@@ -68,8 +68,14 @@
 			placeholder="Paste incident description here..."
 		></textarea>
 
-		<br />
 		<button onclick="analyze()">Analyze Incident</button>
+		<textarea
+			id="overrideNote"
+			placeholder="Analyst override note (optional)..."
+		></textarea>
+		<button onclick="submitOverride()">Submit Override</button>
+
+		<br />
 
 		<!-- Tabs -->
 		<div class="tabs">
@@ -88,9 +94,16 @@
 		</div>
 
 		<div id="situation" class="tab-content active"></div>
-		<div id="plan" class="tab-content"></div>
+		<div id="plan" class="tab-content">
+			<textarea
+				id="overrideNote"
+				placeholder="Analyst override note (optional)..."
+			></textarea>
+			<button onclick="submitOverride()">Submit Override</button>
+		</div>
 		<div id="rationale" class="tab-content"></div>
 		<div id="evidence" class="tab-content"></div>
+		<button onclick="exportReport()">Export Report (PDF)</button>
 
 		<script src="renderer.js"></script>
 	</body>

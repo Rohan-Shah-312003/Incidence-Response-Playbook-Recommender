@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from app.orchestrator import run_pipeline
+from core.report import generate_report
 
 app = FastAPI(
     title="IRPR – Incident Response Decision Engine",
@@ -27,6 +28,14 @@ class SimilarIncident(BaseModel):
     similarity: float
     text: str
 
+class Severity(BaseModel):
+    level: str
+    score: int
+
+class AnalystOverride(BaseModel):
+    corrected_incident_type: str
+    analyst_note: str
+
 
 class ActionExplanation(BaseModel):
     action_id: str
@@ -46,11 +55,30 @@ class IncidentResponse(BaseModel):
     actions: list[ActionItem]
     explanations: list[ActionExplanation]
     similar_incidents: list[SimilarIncident]
+    severity: Severity 
+
+
 
 
 # -------------------------
 # API Endpoint
 # -------------------------
+
+@app.post("/export")
+def export_report(req: IncidentRequest):
+    result = run_pipeline(req.incident_text)
+    filename = "incident_report.pdf"
+    generate_report(filename, result)
+    return {"status": "report generated", "file": filename}
+
+@app.post("/override")
+def analyst_override(override: AnalystOverride):
+    # In real systems this would persist to DB
+    return {
+        "status": "override recorded",
+        "corrected_type": override.corrected_incident_type,
+        "note": override.analyst_note
+    }
 
 
 @app.post("/analyze", response_model=IncidentResponse)
@@ -77,4 +105,5 @@ def analyze_incident(req: IncidentRequest):
         ],
         "similar_incidents": result["similar_incidents"],
         "situation_assessment": result["situation_assessment"],
+        "severity": result["severity"],
     }

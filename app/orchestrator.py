@@ -2,6 +2,8 @@ from core.classifier import classify_incident
 from core.similarity import recommend_actions
 from core.explainer import explain_actions
 from core.situation import generate_situation_assessment
+from core.severity import compute_severity
+
 
 def run_pipeline(incident_text: str):
     result = {}
@@ -16,6 +18,8 @@ def run_pipeline(incident_text: str):
     actions, similar_incidents = recommend_actions(incident_text)
     result["actions"] = actions
     result["similar_incidents"] = similar_incidents
+    severity = compute_severity(label, cls_conf, actions)
+    result["severity"] = severity
 
     # Generate situation assessment (Phase 4.5)
     situation = generate_situation_assessment(
@@ -26,6 +30,7 @@ def run_pipeline(incident_text: str):
     )
 
     result["situation_assessment"] = situation
+
 
     explanations = explain_actions(incident_text, actions)
     result["explanations"] = explanations
