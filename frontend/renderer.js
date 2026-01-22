@@ -50,8 +50,8 @@ async function analyze() {
 		data.actions.forEach((a) => {
 			rationaleText += "----------------------------------------\n";
 			rationaleText += `Action: ${a.action_id}\n\n`;
-			// rationaleText += data.explanations[a.action_id] + "\n\n";
-			const explanation = data.explanations[a.action_id];
+			rationaleText += data.explanations[a.action_id] + "\n\n";
+			const explanation = rationaleText;
 			if (explanation) {
 				rationaleText += explanation + "\n\n";
 			} else {

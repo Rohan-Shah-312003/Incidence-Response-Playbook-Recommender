@@ -12,16 +12,12 @@ def run_pipeline(incident_text: str):
     result["incident_type"] = label
     result["classification_confidence"] = cls_conf
 
-    # actions = recommend_actions(incident_text)
-    # result["actions"] = actions
-
     actions, similar_incidents = recommend_actions(incident_text)
     result["actions"] = actions
     result["similar_incidents"] = similar_incidents
     severity = compute_severity(label, cls_conf, actions)
     result["severity"] = severity
 
-    # Generate situation assessment (Phase 4.5)
     situation = generate_situation_assessment(
         incident_text,
         label,
@@ -34,5 +30,9 @@ def run_pipeline(incident_text: str):
 
     explanations = explain_actions(incident_text, actions)
     result["explanations"] = explanations
+
+    print("ACTIONS:", actions)
+    print("EXPLANATIONS:", explanations)
+
 
     return result

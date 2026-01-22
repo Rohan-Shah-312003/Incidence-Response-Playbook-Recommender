@@ -8,22 +8,14 @@ def generate_situation_assessment(
     confidence: float,
     similar_incidents: list
 ) -> str:
-    """
-    Generate a high-level situation assessment.
-    This function MUST NOT recommend actions.
-    """
-
+    
     # Summarize similar incidents for grounding
     similar_summary = "\n".join(
         f"- [{s['incident_type']}] similarity={s['similarity']:.2f}"
         for s in similar_incidents[:3]
     )
 
-    confidence_note = (
-        "The classification confidence is low, and multiple incident types remain plausible."
-        if confidence < 0.6
-        else "The classification confidence is moderate to high."
-    )
+
 
     prompt = f"""
         You are generating a professional incident response situation assessment
@@ -31,7 +23,6 @@ def generate_situation_assessment(
 
         Incident description:
         {incident_text}
-
         Model assessment:
         - Predicted incident type: {incident_type}
         - Classification confidence: {confidence:.2f}
@@ -60,7 +51,7 @@ def generate_situation_assessment(
         model="llama-3.1-8b-instant",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.2,
-        max_tokens=350
+        # max_tokens=350
     )
 
     return completion.choices[0].message.content.strip()

@@ -34,3 +34,4 @@ def generate_report(filename: str, result: dict):
 
     c.drawText(text)
     c.save()
+  

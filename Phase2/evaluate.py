@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay
 
 from train_models import train
+from plots_confusion import plot_confusion
+
 
 os.makedirs("./Phase2/results", exist_ok=True)
 
@@ -14,6 +16,14 @@ def evaluate():
 
         y_pred = pipeline.predict(X_test)
         print(classification_report(y_test, y_pred))
+        # for plotting is giving errors.
+        # plot_confusion(
+        #     y_test,
+        #     y_pred,
+        #     labels=plt.clf.classes_, # giving error - no clf class.
+        #     title="Normalized Confusion Matrix (Linear SVM)",
+        #     outfile="results/confusion_matrix.png"
+        # )
 
         cm = confusion_matrix(y_test, y_pred)
         disp = ConfusionMatrixDisplay(cm, display_labels=pipeline.classes_)
@@ -25,3 +35,5 @@ def evaluate():
 
 if __name__ == "__main__":
     evaluate()
+
+
