@@ -67,7 +67,7 @@ def recommend_actions(text: str, incident_type: str, cls_conf: float, top_k: int
             ranked_actions.append(
                 {
                     "action_id": action_id,
-                    "confidence": round((score / max_score), 2),
+                    "confidence": round((score / max_score) * 100, 2),
                     "phase": phase,
                     "phase_rank": phase_rank,
                 }

@@ -1,12 +1,16 @@
-function openTab(tabId) {
+import { marked } from "marked";
+
+
+function openTab(tabId, evt) {
 	document
 		.querySelectorAll(".tab-content")
 		.forEach((t) => t.classList.remove("active"));
 	document
 		.querySelectorAll(".tab-btn")
 		.forEach((b) => b.classList.remove("active"));
+
 	document.getElementById(tabId).classList.add("active");
-	event.target.classList.add("active");
+	if (evt) evt.target.classList.add("active");
 }
 
 async function analyze() {
@@ -16,7 +20,7 @@ async function analyze() {
 		return;
 	}
 
-	openTab("situation");
+	openTab("situation", event);
 
 	document.getElementById("situation").innerText = "Analyzing incident...";
 	document.getElementById("plan").innerText = "";
@@ -25,7 +29,7 @@ async function analyze() {
 
 	try {
 		const data = await window.api.analyzeIncident(input);
-
+		
 		/* -------- SITUATION -------- */
 		document.getElementById("situation").innerText =
 			`Severity: ${data.severity.level} (Score: ${data.severity.score})\n\n` +
@@ -39,24 +43,42 @@ async function analyze() {
 		let planText = "";
 		data.actions.forEach((a, idx) => {
 			planText += `${idx + 1}. ${a.action_id} (${a.phase})\n`;
-			planText += `   Relative relevance score: ${(
-				a.confidence * 100
-			).toFixed(1)}%\n\n`;
+			planText += `   Relative relevance score: ${a.confidence.toFixed(
+				1,
+			)}%\n\n`;
 		});
 		document.getElementById("plan").innerText = planText;
 
 		/* -------- RATIONALE -------- */
 		let rationaleText = "";
-		data.actions.forEach((action) => {
-			const explanation = data.explanations[action.action_id];
 
+		// Normalize explanations into a map
+		let explanationMap = {};
+
+		if (Array.isArray(data.explanations)) {
+			data.explanations.forEach((e) => {
+				explanationMap[e.action_id] = e.explanation;
+			});
+		} else if (typeof data.explanations === "string") {
+			try {
+				const parsed = JSON.parse(data.explanations);
+				parsed.forEach((e) => {
+					explanationMap[e.action_id] = e.explanation;
+				});
+			} catch (err) {
+				console.error("Failed to parse explanations:", err);
+			}
+		}
+
+		data.actions.forEach((action) => {
 			rationaleText += "----------------------------------------\n";
 			rationaleText += `Action: ${action.action_id}\n\n`;
-			rationaleText += explanation
-				? explanation
+			rationaleText += explanationMap[action.action_id]
+				? explanationMap[action.action_id]
 				: "No explanation available.\n";
 			rationaleText += "\n\n";
 		});
+
 		document.getElementById("rationale").innerText = rationaleText;
 
 		/* -------- EVIDENCE -------- */
@@ -67,20 +89,6 @@ async function analyze() {
 			evidenceText += `${item.text}\n\n`;
 		});
 		document.getElementById("evidence").innerText = evidenceText;
-		async function submitOverride() {
-			const note = document.getElementById("overrideNote").value;
-
-			await fetch("http://127.0.0.1:8000/override", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					corrected_incident_type: "Manual Review",
-					analyst_note: note,
-				}),
-			});
-
-			alert("Analyst override recorded.");
-		}
 	} catch (err) {
 		document.getElementById("situation").innerText =
 			"Error communicating with backend.";
