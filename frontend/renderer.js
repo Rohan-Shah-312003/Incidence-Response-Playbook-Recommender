@@ -47,17 +47,15 @@ async function analyze() {
 
 		/* -------- RATIONALE -------- */
 		let rationaleText = "";
-		data.actions.forEach((a) => {
+		data.actions.forEach((action) => {
+			const explanation = data.explanations[action.action_id];
+
 			rationaleText += "----------------------------------------\n";
-			rationaleText += `Action: ${a.action_id}\n\n`;
-			rationaleText += data.explanations[a.action_id] + "\n\n";
-			const explanation = rationaleText;
-			if (explanation) {
-				rationaleText += explanation + "\n\n";
-			} else {
-				rationaleText +=
-					"No explanation available for this action.\n\n";
-			}
+			rationaleText += `Action: ${action.action_id}\n\n`;
+			rationaleText += explanation
+				? explanation
+				: "No explanation available.\n";
+			rationaleText += "\n\n";
 		});
 		document.getElementById("rationale").innerText = rationaleText;
 
@@ -90,18 +88,16 @@ async function analyze() {
 }
 
 async function exportReport() {
-  await fetch("http://127.0.0.1:8000/export", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      incident_text: document.getElementById("incidentInput").value
-    })
-  });
+	await fetch("http://127.0.0.1:8000/export", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			incident_text: document.getElementById("incidentInput").value,
+		}),
+	});
 
-  alert("Incident report generated.");
+	alert("Incident report generated.");
 }
-
-
 
 async function submitOverride() {
 	const note = document.getElementById("overrideNote").value;

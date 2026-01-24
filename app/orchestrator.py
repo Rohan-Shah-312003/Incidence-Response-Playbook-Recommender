@@ -5,34 +5,61 @@ from core.situation import generate_situation_assessment
 from core.severity import compute_severity
 
 
+# def run_pipeline(incident_text: str):
+#     result = {}
+
+#     label, cls_conf = classify_incident(incident_text)
+#     result["incident_type"] = label
+#     result["classification_confidence"] = cls_conf
+
+#     actions, similar_incidents = recommend_actions(incident_text, label, cls_conf)
+#     result["actions"] = actions
+#     result["similar_incidents"] = similar_incidents
+#     severity = compute_severity(label, cls_conf, actions)
+#     result["severity"] = severity
+
+#     situation = generate_situation_assessment(
+#         incident_text, label, cls_conf, similar_incidents
+#     )
+
+#     result["situation_assessment"] = situation
+
+#     explanations = explain_actions(incident_text, actions)
+#     result["explanations"] = explanations
+
+#     print("ACTIONS:", actions)
+#     print("EXPLANATIONS:", explanations)
+
+#     return result
+
 def run_pipeline(incident_text: str):
-    result = {}
+    print("[PIPELINE] Start")
 
     label, cls_conf = classify_incident(incident_text)
-    result["incident_type"] = label
-    result["classification_confidence"] = cls_conf
+    print("[PIPELINE] Classified")
 
-    actions, similar_incidents = recommend_actions(incident_text)
-    result["actions"] = actions
-    result["similar_incidents"] = similar_incidents
+    actions, similar_incidents = recommend_actions(
+        incident_text, label, cls_conf
+    )
+    print("[PIPELINE] Actions + similarity done")
+
     severity = compute_severity(label, cls_conf, actions)
-    result["severity"] = severity
+    print("[PIPELINE] Severity done")
 
     situation = generate_situation_assessment(
-        incident_text,
-        label,
-        cls_conf,
-        similar_incidents
+        incident_text, label, cls_conf, similar_incidents
     )
-
-    result["situation_assessment"] = situation
-
+    print("[PIPELINE] Situation assessment done")
 
     explanations = explain_actions(incident_text, actions)
-    result["explanations"] = explanations
+    print("[PIPELINE] Explanations done")
 
-    print("ACTIONS:", actions)
-    print("EXPLANATIONS:", explanations)
-
-
-    return result
+    return {
+        "incident_type": label,
+        "classification_confidence": cls_conf,
+        "actions": actions,
+        "similar_incidents": similar_incidents,
+        "severity": severity,
+        "situation_assessment": situation,
+        "explanations": explanations,
+    }

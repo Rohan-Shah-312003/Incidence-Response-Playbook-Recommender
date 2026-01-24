@@ -4,6 +4,15 @@ from sklearn.metrics.pairwise import cosine_similarity
 from core.constants import PHASE_ORDER
 import json
 
+PHASE_WEIGHTS = {
+    "Identification": 1.0,
+    "Containment": 0.8,
+    "Eradication": 0.6,
+    "Recovery": 0.5,
+    "Post-Incident": 0.4,
+}
+
+
 DATA_PATH = "./data/real_incidents_balanced.csv"
 VECTORIZER_PATH = "./models/tfidf.pkl"
 
@@ -21,7 +30,8 @@ ACTION_MAP = {
 }
 
 
-def recommend_actions(text: str, top_k: int = 5):
+def recommend_actions(text: str, incident_type: str, cls_conf: float, top_k: int = 5):
+
     x_new = vectorizer.transform([text])
     similarities = cosine_similarity(x_new, X_hist)[0]
 
@@ -40,10 +50,15 @@ def recommend_actions(text: str, top_k: int = 5):
             {"incident_type": label, "similarity": float(sim), "text": snippet}
         )
 
-        for action in ACTION_MAP.get(label, []):
-            action_scores[action] = action_scores.get(action, 0) + sim
+        for action_id in ACTION_MAP.get(label, []):
+            phase = ACTION_KB[action_id]["phase"]
+            phase_weight = PHASE_WEIGHTS.get(phase, 0.3)
+
+            weighted_score = sim * phase_weight * cls_conf
+            action_scores[action_id] = action_scores.get(action_id, 0) + weighted_score
 
         ranked_actions = []
+        max_score = max(action_scores.values()) if action_scores else 1.0
 
         for action_id, score in action_scores.items():
             phase = ACTION_KB[action_id]["phase"]
@@ -52,7 +67,7 @@ def recommend_actions(text: str, top_k: int = 5):
             ranked_actions.append(
                 {
                     "action_id": action_id,
-                    "confidence": score / total_sim,
+                    "confidence": round((score / max_score), 2),
                     "phase": phase,
                     "phase_rank": phase_rank,
                 }
