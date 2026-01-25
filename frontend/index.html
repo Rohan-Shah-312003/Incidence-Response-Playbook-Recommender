@@ -1,243 +1,671 @@
-<!doctype html>
-<html>
-	<head>
-		<meta charset="UTF-8" />
-		<title>IRPR – Incident Response Assistant</title>
-		<style>
-			body {
-				font-family: Arial, sans-serif;
-				padding: 20px;
-				background: #0f172a;
-				color: #e5e7eb;
-			}
-			textarea {
-				width: 100%;
-				height: 120px;
-				font-size: 14px;
-				background: #1e293b;
-				color: #e5e7eb;
-				border: 1px solid #334155;
-				padding: 10px;
-				border-radius: 5px;
-			}
-			button {
-				margin-top: 10px;
-				padding: 10px 20px;
-				font-size: 16px;
-				cursor: pointer;
-				background: #3b82f6;
-				color: white;
-				border: none;
-				border-radius: 5px;
-			}
-			button:hover {
-				background: #2563eb;
-			}
-			.result {
-				margin-top: 20px;
-				white-space: pre-wrap;
-				background: #020617;
-				padding: 15px;
-				border-radius: 5px;
-			}
-			.tabs {
-				margin-top: 20px;
-			}
 
-			.tab-btn {
-				background: #1e293b;
-				color: #e5e7eb;
-				border: none;
-				padding: 10px 15px;
-				cursor: pointer;
-				margin-right: 5px;
-				border-radius: 5px 5px 0 0;
-			}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRPR - Incident Response Assistant</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<script src="renderer.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-			.tab-btn.active {
-				background: #334155;
-			}
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e5e7eb;
+            min-height: 100vh;
+            padding: 2rem;
+        }
 
-			.tab-btn:hover {
-				background: #334155;
-			}
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-			.tab-content {
-				display: none;
-				margin-top: 0;
-				padding: 15px;
-				background: #020617;
-				border-radius: 0 5px 5px 5px;
-				white-space: pre-wrap;
-				min-height: 200px;
-			}
+        /* Header */
+        header {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
 
-			.tab-content.active {
-				display: block;
-			}
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
 
-			/* ✅ NEW: Markdown styling for rendered content */
-			.markdown-content {
-				white-space: normal; /* Allow normal text wrapping for markdown */
-				line-height: 1.6;
-			}
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+        }
 
-			.markdown-content h1,
-			.markdown-content h2,
-			.markdown-content h3 {
-				color: #60a5fa;
-				margin-top: 1em;
-				margin-bottom: 0.5em;
-			}
+        /* Input Section */
+        .input-section {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
 
-			.markdown-content h1 {
-				font-size: 1.8em;
-				border-bottom: 2px solid #334155;
-				padding-bottom: 0.3em;
-			}
+        .input-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
 
-			.markdown-content h2 {
-				font-size: 1.5em;
-			}
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            font-size: 0.95rem;
+            background: rgba(15, 23, 42, 0.8);
+            color: #e5e7eb;
+            border: 2px solid rgba(100, 116, 139, 0.3);
+            padding: 1rem;
+            border-radius: 12px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
 
-			.markdown-content h3 {
-				font-size: 1.2em;
-			}
+        textarea:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+        }
 
-			.markdown-content p {
-				margin: 0.8em 0;
-			}
+        textarea::placeholder {
+            color: #64748b;
+        }
 
-			.markdown-content ul,
-			.markdown-content ol {
-				margin: 0.8em 0;
-				padding-left: 2em;
-			}
+        /* Button */
+        .analyze-btn {
+            margin-top: 1rem;
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+            letter-spacing: 0.5px;
+        }
 
-			.markdown-content li {
-				margin: 0.4em 0;
-			}
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4);
+        }
 
-			.markdown-content strong {
-				color: #fbbf24;
-				font-weight: bold;
-			}
+        .analyze-btn:active {
+            transform: translateY(0);
+        }
 
-			.markdown-content em {
-				color: #a78bfa;
-				font-style: italic;
-			}
+        .analyze-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
 
-			.markdown-content code {
-				background: #1e293b;
-				padding: 0.2em 0.4em;
-				border-radius: 3px;
-				font-family: "Courier New", monospace;
-				color: #34d399;
-			}
+        /* Tabs */
+        .tabs-container {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
 
-			.markdown-content pre {
-				background: #1e293b;
-				padding: 1em;
-				border-radius: 5px;
-				overflow-x: auto;
-				margin: 1em 0;
-			}
+        .tab-buttons {
+            display: flex;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 0.5rem;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+            overflow-x: auto;
+        }
 
-			.markdown-content pre code {
-				background: none;
-				padding: 0;
-			}
+        .tab-btn {
+            background: transparent;
+            color: #94a3b8;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
 
-			.markdown-content blockquote {
-				border-left: 4px solid #3b82f6;
-				padding-left: 1em;
-				margin: 1em 0;
-				color: #9ca3af;
-			}
+        .tab-btn:hover {
+            background: rgba(100, 116, 139, 0.2);
+            color: #cbd5e1;
+        }
 
-			.markdown-content a {
-				color: #60a5fa;
-				text-decoration: none;
-			}
+        .tab-btn.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
 
-			.markdown-content a:hover {
-				text-decoration: underline;
-			}
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            min-height: 400px;
+        }
 
-			.override-section {
-				margin-top: 20px;
-				padding-top: 20px;
-				border-top: 1px solid #334155;
-			}
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
 
-			.override-section textarea {
-				height: 80px;
-				margin-bottom: 10px;
-			}
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-			.export-section {
-				margin-top: 20px;
-			}
-		</style>
-	</head>
+        /* Severity Badge */
+        .severity-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
 
-	<body>
-		<h2>IRPR – Incident Response Assistant</h2>
+        .severity-low { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .severity-medium { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .severity-high { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
+        .severity-critical { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
 
-		<textarea
-			id="incidentInput"
-			placeholder="Paste incident description here..."
-		></textarea>
+        /* Info Cards */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
 
-		<button onclick="analyze()">Analyze Incident</button>
+        .info-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
 
-		<div class="tabs">
-			<button
-				class="tab-btn active"
-				onclick="openTab('situation', event)"
-			>
-				Situation
-			</button>
-			<button class="tab-btn" onclick="openTab('plan', event)">
-				Response Plan
-			</button>
-			<button class="tab-btn" onclick="openTab('rationale', event)">
-				Rationale
-			</button>
-			<button class="tab-btn" onclick="openTab('evidence', event)">
-				Evidence
-			</button>
-		</div>
+        .info-card-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
 
-		<div id="situation" class="tab-content active">
-			Click "Analyze Incident" to begin...
-		</div>
+        .info-card-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #60a5fa;
+        }
 
-		<div id="plan" class="tab-content">
-			<div id="planContent"></div>
+        /* Action Items */
+        .action-item {
+            background: rgba(15, 23, 42, 0.6);
+            border-left: 4px solid #3b82f6;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
 
-			<div class="override-section">
-				<h3>Analyst Override</h3>
-				<textarea
-					id="overrideNote"
-					placeholder="Enter override note if you disagree with the recommendation..."
-				></textarea>
-				<button onclick="submitOverride()">Submit Override</button>
-			</div>
-		</div>
+        .action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
 
-		<div id="rationale" class="tab-content"></div>
+        .action-id {
+            font-weight: 700;
+            color: #60a5fa;
+            font-size: 1.1rem;
+        }
 
-		<div id="evidence" class="tab-content"></div>
+        .action-phase {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            background: rgba(100, 116, 139, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+        }
 
-		<div class="export-section">
-			<button onclick="exportReport()">Export Report (PDF)</button>
-		</div>
+        .action-confidence {
+            font-size: 0.875rem;
+            color: #cbd5e1;
+            margin-top: 0.5rem;
+        }
 
-		<!-- ✅ Load marked library BEFORE renderer.js -->
-		<!-- <script src="node_modules/marked/bin/marked.js"></script> -->
-		<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-		<script src="renderer.js"></script>
-	</body>
+        /* Evidence Items */
+        .evidence-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .evidence-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .evidence-type {
+            font-weight: 600;
+            color: #a78bfa;
+        }
+
+        .evidence-similarity {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        .evidence-text {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Override Section */
+        .override-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(100, 116, 139, 0.2);
+        }
+
+        .override-section h3 {
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .override-section textarea {
+            min-height: 100px;
+            margin-bottom: 1rem;
+        }
+
+        .secondary-btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: rgba(100, 116, 139, 0.3);
+            color: #cbd5e1;
+            border: 1px solid rgba(100, 116, 139, 0.5);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .secondary-btn:hover {
+            background: rgba(100, 116, 139, 0.5);
+        }
+
+        /* Export Section */
+        .export-section {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .export-btn {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Markdown Content */
+        .markdown-content {
+            line-height: 1.7;
+        }
+
+        .markdown-content h2 {
+            color: #60a5fa;
+            margin: 1.5rem 0 1rem;
+            font-size: 1.5rem;
+        }
+
+        .markdown-content h3 {
+            color: #a78bfa;
+            margin: 1.25rem 0 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .markdown-content p {
+            margin: 0.875rem 0;
+            color: #cbd5e1;
+        }
+
+        .markdown-content strong {
+            color: #fbbf24;
+        }
+
+        .markdown-content ul, .markdown-content ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        .markdown-content li {
+            margin: 0.5rem 0;
+            color: #cbd5e1;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(100, 116, 139, 0.3);
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            h1 { font-size: 2rem; }
+            .info-grid { grid-template-columns: 1fr; }
+            .tab-buttons { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ IRPR</h1>
+            <p class="subtitle">Intelligent Incident Response & Playbook Recommender</p>
+        </header>
+
+        <div class="input-section">
+            <label class="input-label">📝 Incident Description</label>
+            <textarea 
+                id="incidentInput" 
+                placeholder="Describe the security incident in detail... (e.g., unusual login attempts, suspicious email, data access anomalies)"
+            ></textarea>
+            <button class="analyze-btn" onclick="analyze()" id="analyzeBtn">
+                🔍 Analyze Incident
+            </button>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="openTab('situation', event)">
+                    📊 Situation
+                </button>
+                <button class="tab-btn" onclick="openTab('plan', event)">
+                    📋 Response Plan
+                </button>
+                <button class="tab-btn" onclick="openTab('rationale', event)">
+                    💡 Rationale
+                </button>
+                <button class="tab-btn" onclick="openTab('evidence', event)">
+                    🔍 Evidence
+                </button>
+            </div>
+
+            <div id="situation" class="tab-content active">
+                <p style="color: #64748b; text-align: center; padding: 3rem;">
+                    👆 Enter an incident description and click "Analyze Incident" to begin
+                </p>
+            </div>
+
+            <div id="plan" class="tab-content">
+                <div id="planContent"></div>
+                <div class="override-section">
+                    <h3>👤 Analyst Override</h3>
+                    <textarea 
+                        id="overrideNote" 
+                        placeholder="Enter your analysis notes or corrections if you disagree with the automated recommendation..."
+                    ></textarea>
+                    <button class="secondary-btn" onclick="submitOverride()">
+                        Submit Override
+                    </button>
+                </div>
+            </div>
+
+            <div id="rationale" class="tab-content"></div>
+
+            <div id="evidence" class="tab-content"></div>
+        </div>
+
+        <div class="export-section">
+            <button class="export-btn" onclick="exportReport()">
+                📄 Export Report (PDF)
+            </button>
+        </div>
+    </div>
+
+    <!-- <script>
+        const API_BASE = 'http://127.0.0.1:8000';
+
+        function openTab(tabId, evt) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (evt && evt.target) evt.target.classList.add('active');
+        }
+
+        function getSeverityClass(level) {
+            const map = {
+                'Low': 'severity-low',
+                'Medium': 'severity-medium',
+                'High': 'severity-high',
+                'Critical': 'severity-critical'
+            };
+            return map[level] || 'severity-medium';
+        }
+
+        async function analyze() {
+            const input = document.getElementById('incidentInput').value;
+            if (!input.trim()) {
+                alert('⚠️ Please enter an incident description.');
+                return;
+            }
+
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<span class="spinner"></span> Analyzing...';
+
+            openTab('situation');
+
+            const situationEl = document.getElementById('situation');
+            situationEl.innerHTML = '<div class="loading"><div class="spinner"></div>Analyzing incident...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ incident_text: input })
+                });
+
+                if (!response.ok) throw new Error(`Analysis failed: ${response.status}`);
+
+                const data = await response.json();
+
+                // SITUATION TAB
+                const severityClass = getSeverityClass(data.severity.level);
+                situationEl.innerHTML = `
+                    <div class="severity-badge ${severityClass}">
+                        ${data.severity.level} Severity (Score: ${data.severity.score}/5)
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-card-label">Incident Type</div>
+                            <div class="info-card-value">${data.incident_type}</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-label">Confidence</div>
+                            <div class="info-card-value">${(data.classification_confidence * 100).toFixed(1)}%</div>
+                        </div>
+                    </div>
+                    <div class="markdown-content">
+                        ${marked.parse(data.situation_assessment)}
+                    </div>
+                `;
+
+                // RESPONSE PLAN TAB
+                let planHTML = '';
+                data.actions.forEach((a, idx) => {
+                    planHTML += `
+                        <div class="action-item">
+                            <div class="action-header">
+                                <span class="action-id">${idx + 1}. ${a.action_id}</span>
+                                <span class="action-phase">${a.phase}</span>
+                            </div>
+                            <div class="action-confidence">
+                                Relevance Score: ${a.confidence.toFixed(1)}%
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('planContent').innerHTML = planHTML;
+
+                // RATIONALE TAB
+                let rationaleHTML = '<div class="markdown-content">';
+                const explanationMap = {};
+                data.explanations.forEach(e => {
+                    explanationMap[e.action_id] = e.explanation;
+                });
+
+                data.actions.forEach((action, idx) => {
+                    const explanation = explanationMap[action.action_id] || 'No explanation available.';
+                    rationaleHTML += `
+                        <h2>${idx + 1}. ${action.action_id}</h2>
+                        ${marked.parse(explanation)}
+                    `;
+                });
+                rationaleHTML += '</div>';
+                document.getElementById('rationale').innerHTML = rationaleHTML;
+
+                // EVIDENCE TAB
+                let evidenceHTML = '<h2 style="color: #60a5fa; margin-bottom: 1.5rem;">Similar Historical Incidents</h2>';
+                data.similar_incidents.forEach((item, idx) => {
+                    evidenceHTML += `
+                        <div class="evidence-item">
+                            <div class="evidence-header">
+                                <span class="evidence-type">${idx + 1}. [${item.incident_type}]</span>
+                                <span class="evidence-similarity">Similarity: ${(item.similarity * 100).toFixed(1)}%</span>
+                            </div>
+                            <div class="evidence-text">${item.text}</div>
+                        </div>
+                    `;
+                });
+                document.getElementById('evidence').innerHTML = evidenceHTML;
+
+            } catch (err) {
+                console.error('Analysis error:', err);
+                situationEl.innerHTML = `
+                    <p style="color: #ef4444; font-weight: 600;">❌ Error: ${err.message}</p>
+                    <p style="color: #94a3b8; margin-top: 1rem;">Please ensure the backend server is running at ${API_BASE}</p>
+                `;
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '🔍 Analyze Incident';
+            }
+        }
+
+        async function exportReport() {
+            const input = document.getElementById('incidentInput').value;
+            if (!input.trim()) {
+                alert('⚠️ Please analyze an incident first.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/export`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ incident_text: input })
+                });
+
+                if (!response.ok) throw new Error(`Export failed: ${response.status}`);
+
+                alert('✅ Incident report generated successfully!');
+            } catch (err) {
+                console.error('Export error:', err);
+                alert(`❌ Failed to export report: ${err.message}`);
+            }
+        }
+
+        async function submitOverride() {
+            const note = document.getElementById('overrideNote').value;
+            if (!note.trim()) {
+                alert('⚠️ Please enter a note for the override.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/override`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        corrected_incident_type: 'Manual Review',
+                        analyst_note: note
+                    })
+                });
+
+                if (!response.ok) throw new Error(`Override failed: ${response.status}`);
+
+                alert('✅ Analyst override recorded successfully!');
+                document.getElementById('overrideNote').value = '';
+            } catch (err) {
+                console.error('Override error:', err);
+                alert(`❌ Failed to submit override: ${err.message}`);
+            }
+        }
+    </script> -->
+</body>
 </html>
