@@ -140,13 +140,26 @@ async function exportReport() {
 
 async function submitOverride() {
   const note = document.getElementById("overrideNote").value;
+  const incidentText = document.getElementById("incidentInput").value;
+  const correctedType = document.getElementById("overrideType").value;
+
+  if (!incidentText.trim()) {
+    alert("Cannot submit override without an incident description.");
+    return;
+  }
+
+  if (!correctedType.trim()) {
+    alert("Please enter the corrected incident type.");
+    return;
+  }
 
   try {
     const response = await fetch("http://127.0.0.1:8000/override", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        corrected_incident_type: "Manual Review",
+        incident_text: incidentText,
+        corrected_incident_type: correctedType,
         analyst_note: note,
       }),
     });

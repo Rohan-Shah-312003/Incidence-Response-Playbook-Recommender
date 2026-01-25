@@ -3,12 +3,41 @@ from pydantic import BaseModel
 from app.orchestrator import run_pipeline
 from core.report import generate_report
 import os
+import sqlite3
+from datetime import datetime
 
 app = FastAPI(
     title="IRPR – Incident Response Decision Engine",
     description="ML + Similarity + RAG based incident response assistant",
     version="1.0.0",
 )
+
+# -------------------------
+# Database setup
+# -------------------------
+DB_PATH = os.path.join(os.path.expanduser("~/Desktop"), "irpr_overrides.db")
+
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS overrides (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            incident_text TEXT NOT NULL,
+            corrected_incident_type TEXT NOT NULL,
+            analyst_note TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
+@app.on_event("startup")
+async def startup_event():
+    init_db()
+
 
 # -------------------------
 # Request schema
@@ -29,11 +58,14 @@ class SimilarIncident(BaseModel):
     similarity: float
     text: str
 
+
 class Severity(BaseModel):
     level: str
     score: int
 
+
 class AnalystOverride(BaseModel):
+    incident_text: str
     corrected_incident_type: str
     analyst_note: str
 
@@ -56,14 +88,13 @@ class IncidentResponse(BaseModel):
     actions: list[ActionItem]
     explanations: list[ActionExplanation]
     similar_incidents: list[SimilarIncident]
-    severity: Severity 
-
-
+    severity: Severity
 
 
 # -------------------------
 # API Endpoint
 # -------------------------
+
 
 @app.post("/export")
 def export_report(req: IncidentRequest):
@@ -73,14 +104,25 @@ def export_report(req: IncidentRequest):
     generate_report(filename, result)
     return {"status": "report generated", "file": filename}
 
+
 @app.post("/override")
 def analyst_override(override: AnalystOverride):
-    # In real systems this would persist to DB
-    return {
-        "status": "override recorded",
-        "corrected_type": override.corrected_incident_type,
-        "note": override.analyst_note
-    }
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO overrides (incident_text, corrected_incident_type, analyst_note) VALUES (?, ?, ?)",
+            (
+                override.incident_text,
+                override.corrected_incident_type,
+                override.analyst_note,
+            ),
+        )
+        conn.commit()
+        conn.close()
+        return {"status": "override recorded"}
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
 @app.post("/analyze", response_model=IncidentResponse)
@@ -97,7 +139,7 @@ def analyze_incident(req: IncidentRequest):
             {
                 "action_id": a["action_id"],
                 "confidence": a["confidence"],
-                "phase": a["phase"]
+                "phase": a["phase"],
             }
             for a in result["actions"]
         ],

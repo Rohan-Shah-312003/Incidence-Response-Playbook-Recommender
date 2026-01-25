@@ -21,5 +21,52 @@ Analyze this as a credential misuse scenario with emphasis on initial access vec
 
 **Prompt** - During routine monitoring, repeated authentication attempts were observed on a file server at 12:30 AM. The attempts originated from a valid internal user account accessing sensitive directories.
 
-**Override** - Treat repeated authentication attempts as deliberate credential probing, not user error.
-Emphasize brute-force behavior, password spraying, and account enumeration, even if the account is internal and valid.
+**Override** - Do not escalate this incident as a confirmed Insider Misuse or immediately disable the user account at this stage.
+
+The activity involves a valid internal account with authentication attempts to sensitive directories during non-business hours, but there is no evidence yet of successful access, data exfiltration, privilege escalation, or malicious tooling.
+
+The classification confidence (46.6%) is below acceptable threshold for high-impact containment actions such as account disablement or system isolation. Similarity scores show overlap with benign access-change and permission-related historical incidents, not a dominant insider misuse pattern.
+
+Key considerations for override:
+
+Access attempts may be explained by legitimate after-hours work, automated scripts, scheduled jobs, or misconfigured permissions.
+
+No corroborating indicators (file reads/writes, downloads, data transfer, anomalous process execution) are currently present.
+
+Premature containment (account disablement) could disrupt legitimate business operations and negatively impact user trust.
+
+Adjusted Response Direction
+
+Proceed with IR-ID-01 (Scope Confirmation) and IR-ID-02 (Evidence Preservation) only.
+
+Defer all containment actions (IR-CON-01 / IR-CON-02 / IR-CON-03) until:
+
+Successful authentication is confirmed AND
+
+Evidence of unauthorized access or misuse is observed.
+
+Add verification steps:
+
+Correlate authentication logs with file access logs.
+
+Check for scheduled tasks, service accounts, or automation linked to the user.
+
+Validate user’s role, access approvals, and recent change requests.
+
+Risk Reclassification (Temporary)
+
+Reclassify incident as “Suspicious Activity – Under Investigation”
+
+Maintain Low severity pending further evidence.
+
+Trigger Conditions for Re-Escalation
+
+Successful access to restricted files
+
+Data transfer outside baseline
+
+Repeated failures followed by success
+
+Lateral movement indicators
+
+Continue monitoring and reassess once additional telemetry is available.
