@@ -1,176 +1,191 @@
 // ✅ Helper function to render markdown
 function renderMarkdown(text) {
-  if (window.marked) {
-    return marked.parse(text);
-  }
-  // Fallback if marked isn't loaded
-  return text.replace(/\n/g, '<br>');
+	if (window.marked) {
+		return marked.parse(text);
+	}
+	// Fallback if marked isn't loaded
+	return text.replace(/\n/g, "<br>");
 }
 
 function openTab(tabId, evt) {
-  document
-    .querySelectorAll(".tab-content")
-    .forEach((t) => t.classList.remove("active"));
-  document
-    .querySelectorAll(".tab-btn")
-    .forEach((b) => b.classList.remove("active"));
+	document
+		.querySelectorAll(".tab-content")
+		.forEach((t) => t.classList.remove("active"));
+	document
+		.querySelectorAll(".tab-btn")
+		.forEach((b) => b.classList.remove("active"));
 
-  document.getElementById(tabId).classList.add("active");
-  if (evt && evt.target) evt.target.classList.add("active");
+	document.getElementById(tabId).classList.add("active");
+	if (evt && evt.target) evt.target.classList.add("active");
 }
 
+// function openTab(tabId, event) {
+// 	// 1. Hide all tab contents
+// 	const contents = document.getElementsByClassName("tab-content");
+// 	for (let i = 0; i < contents.length; i++) {
+// 		contents[i].classList.remove("active");
+// 	}
+
+// 	// 2. Remove 'active' class from all buttons
+// 	const buttons = document.getElementsByClassName("tab-btn");
+// 	for (let i = 0; i < buttons.length; i++) {
+// 		buttons[i].classList.remove("active");
+// 	}
+
+// 	// 3. Show the current tab and add 'active' class to the button
+// 	document.getElementById(tabId).classList.add("active");
+// 	event.currentTarget.classList.add("active");
+// }
+
 async function analyze() {
-  const input = document.getElementById("incidentInput").value;
-  if (!input.trim()) {
-    alert("Please enter an incident description.");
-    return;
-  }
+	const input = document.getElementById("incidentInput").value;
+	if (!input.trim()) {
+		alert("Please enter an incident description.");
+		return;
+	}
 
-  openTab("situation");
+	openTab("situation");
 
-  // Show loading message
-  const situationEl = document.getElementById("situation");
-  situationEl.innerHTML = "<p>Analyzing incident...</p>";
-  situationEl.classList.add("markdown-content");
-  
-  document.getElementById("planContent").innerText = "";
-  document.getElementById("rationale").innerText = "";
-  document.getElementById("evidence").innerText = "";
+	// Show loading message
+	const situationEl = document.getElementById("situation");
+	situationEl.innerHTML = "<p>Analyzing incident...</p>";
+	situationEl.classList.add("markdown-content");
 
-  try {
-    const data = await window.api.analyzeIncident(input);
-    
-    console.log("Received data from backend:", data);
+	document.getElementById("planContent").innerText = "";
+	document.getElementById("rationale").innerText = "";
+	document.getElementById("evidence").innerText = "";
 
-    /* -------- SITUATION -------- */
-    // Build markdown content
-    let situationMarkdown = `## Incident Analysis\n\n`;
-    situationMarkdown += `**Severity:** ${data.severity.level} (Score: ${data.severity.score})\n\n`;
-    situationMarkdown += `**Incident Type:** ${data.incident_type}\n\n`;
-    situationMarkdown += `**Classification Confidence:** ${(data.classification_confidence * 100).toFixed(2)}%\n\n`;
-    situationMarkdown += `---\n\n`;
-    situationMarkdown += `### Situation Assessment\n\n`;
-    situationMarkdown += data.situation_assessment;
+	try {
+		const data = await window.api.analyzeIncident(input);
 
-    // ✅ Render markdown and set innerHTML
-    situationEl.innerHTML = renderMarkdown(situationMarkdown);
-    situationEl.classList.add("markdown-content");
+		/* -------- SITUATION -------- */
+		// Build markdown content
+		let situationMarkdown = `## Incident Analysis\n\n`;
+		situationMarkdown += `**Severity:** ${data.severity.level} (Score: ${data.severity.score})\n\n`;
+		situationMarkdown += `**Incident Type:** ${data.incident_type}\n\n`;
+		situationMarkdown += `**Classification Confidence:** ${(data.classification_confidence * 100).toFixed(2)}%\n\n`;
+		situationMarkdown += `---\n\n`;
+		situationMarkdown += `### Situation Assessment\n\n`;
+		situationMarkdown += data.situation_assessment;
 
-    /* -------- RESPONSE PLAN -------- */
-    let planText = "";
-    data.actions.forEach((a, idx) => {
-      planText += `${idx + 1}. ${a.action_id} (${a.phase})\n`;
-      planText += `   Relative relevance score: ${a.confidence.toFixed(1)}%\n\n`;
-    });
-    document.getElementById("planContent").innerText = planText;
+		// ✅ Render markdown and set innerHTML
+		situationEl.innerHTML = renderMarkdown(situationMarkdown);
+		situationEl.classList.add("markdown-content");
 
-    /* -------- RATIONALE -------- */
-    let rationaleText = "";
+		/* -------- RESPONSE PLAN -------- */
+		let planText = "";
+		data.actions.forEach((a, idx) => {
+			planText += `${idx + 1}. ${a.action_id} (${a.phase})\n`;
+			planText += `   Relative relevance score: ${a.confidence.toFixed(1)}%\n\n`;
+		});
+		document.getElementById("planContent").innerText = planText;
 
-    // Normalize explanations into a map
-    let explanationMap = {};
+		/* -------- RATIONALE -------- */
+		let rationaleText = "";
 
-    if (Array.isArray(data.explanations)) {
-      data.explanations.forEach((e) => {
-        explanationMap[e.action_id] = e.explanation;
-      });
-    } else if (typeof data.explanations === "string") {
-      try {
-        const parsed = JSON.parse(data.explanations);
-        parsed.forEach((e) => {
-          explanationMap[e.action_id] = e.explanation;
-        });
-      } catch (err) {
-        console.error("Failed to parse explanations:", err);
-      }
-    }
+		// Normalize explanations into a map
+		let explanationMap = {};
 
-    // ✅ Build markdown for rationale
-    let rationaleMarkdown = "# Action Rationale\n\n";
-    data.actions.forEach((action) => {
-      rationaleMarkdown += `---\n\n`;
-      rationaleMarkdown += `## ${action.action_id}\n\n`;
-      rationaleMarkdown += explanationMap[action.action_id]
-        ? explanationMap[action.action_id] + "\n\n"
-        : "*No explanation available.*\n\n";
-    });
+		if (Array.isArray(data.explanations)) {
+			data.explanations.forEach((e) => {
+				explanationMap[e.action_id] = e.explanation;
+			});
+		} else if (typeof data.explanations === "string") {
+			try {
+				const parsed = JSON.parse(data.explanations);
+				parsed.forEach((e) => {
+					explanationMap[e.action_id] = e.explanation;
+				});
+			} catch (err) {
+				console.error("Failed to parse explanations:", err);
+			}
+		}
 
-    const rationaleEl = document.getElementById("rationale");
-    rationaleEl.innerHTML = renderMarkdown(rationaleMarkdown);
-    rationaleEl.classList.add("markdown-content");
+		// ✅ Build markdown for rationale
+		let rationaleMarkdown = "# Action Rationale\n\n";
+		data.actions.forEach((action) => {
+			rationaleMarkdown += `---\n\n`;
+			rationaleMarkdown += `## ${action.action_id}\n\n`;
+			rationaleMarkdown += explanationMap[action.action_id]
+				? explanationMap[action.action_id] + "\n\n"
+				: "*No explanation available.*\n\n";
+		});
 
-    /* -------- EVIDENCE -------- */
-    let evidenceText = "Similar historical incidents:\n\n";
-    data.similar_incidents.forEach((item, idx) => {
-      evidenceText += `(${idx + 1}) [${item.incident_type}] `;
-      evidenceText += `similarity=${item.similarity.toFixed(3)}\n`;
-      evidenceText += `${item.text}\n\n`;
-    });
-    document.getElementById("evidence").innerText = evidenceText;
-    
-  } catch (err) {
-    console.error("Backend communication error:", err);
-    situationEl.innerHTML =
-      `<p style="color: #ef4444;"><strong>Error communicating with backend:</strong><br>${err.message}</p>` +
-      `<p>Check console for details.</p>`;
-    situationEl.classList.add("markdown-content");
-  }
+		const rationaleEl = document.getElementById("rationale");
+		rationaleEl.innerHTML = renderMarkdown(rationaleMarkdown);
+		rationaleEl.classList.add("markdown-content");
+
+		/* -------- EVIDENCE -------- */
+		let evidenceText = "Similar historical incidents:\n\n";
+		data.similar_incidents.forEach((item, idx) => {
+			evidenceText += `(${idx + 1}) [${item.incident_type}] `;
+			evidenceText += `similarity=${item.similarity.toFixed(3)}\n`;
+			evidenceText += `${item.text}\n\n`;
+		});
+		document.getElementById("evidence").innerText = evidenceText;
+	} catch (err) {
+		console.error("Backend communication error:", err);
+		situationEl.innerHTML =
+			`<p style="color: #ef4444;"><strong>Error communicating with backend:</strong><br>${err.message}</p>` +
+			`<p>Check console for details.</p>`;
+		situationEl.classList.add("markdown-content");
+	}
 }
 
 async function exportReport() {
-  try {
-    const response = await fetch("http://127.0.0.1:8000/export", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        incident_text: document.getElementById("incidentInput").value,
-      }),
-    });
+	try {
+		const response = await fetch("http://127.0.0.1:8000/export", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				incident_text: document.getElementById("incidentInput").value,
+			}),
+		});
 
-    if (!response.ok) {
-      throw new Error(`Export failed: ${response.status}`);
-    }
+		if (!response.ok) {
+			throw new Error(`Export failed: ${response.status}`);
+		}
 
-    alert("Incident report generated.");
-  } catch (err) {
-    console.error("Export error:", err);
-    alert(`Failed to export report: ${err.message}`);
-  }
+		alert("Incident report generated.");
+	} catch (err) {
+		console.error("Export error:", err);
+		alert(`Failed to export report: ${err.message}`);
+	}
 }
 
 async function submitOverride() {
-  const note = document.getElementById("overrideNote").value;
-  const incidentText = document.getElementById("incidentInput").value;
-  const correctedType = document.getElementById("overrideType").value;
+	const note = document.getElementById("overrideNote").value;
+	const incidentText = document.getElementById("incidentInput").value;
+	const correctedType = document.getElementById("overrideType").value;
 
-  if (!incidentText.trim()) {
-    alert("Cannot submit override without an incident description.");
-    return;
-  }
+	if (!incidentText.trim()) {
+		alert("Cannot submit override without an incident description.");
+		return;
+	}
 
-  if (!correctedType.trim()) {
-    alert("Please enter the corrected incident type.");
-    return;
-  }
+	if (!correctedType.trim()) {
+		alert("Please enter the corrected incident type.");
+		return;
+	}
 
-  try {
-    const response = await fetch("http://127.0.0.1:8000/override", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        incident_text: incidentText,
-        corrected_incident_type: correctedType,
-        analyst_note: note,
-      }),
-    });
+	try {
+		const response = await fetch("http://127.0.0.1:8000/override", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				incident_text: incidentText,
+				corrected_incident_type: correctedType,
+				analyst_note: note,
+			}),
+		});
 
-    if (!response.ok) {
-      throw new Error(`Override failed: ${response.status}`);
-    }
+		if (!response.ok) {
+			throw new Error(`Override failed: ${response.status}`);
+		}
 
-    alert("Analyst override recorded.");
-  } catch (err) {
-    console.error("Override error:", err);
-    alert(`Failed to submit override: ${err.message}`);
-  }
+		alert("Analyst override recorded.");
+	} catch (err) {
+		console.error("Override error:", err);
+		alert(`Failed to submit override: ${err.message}`);
+	}
 }

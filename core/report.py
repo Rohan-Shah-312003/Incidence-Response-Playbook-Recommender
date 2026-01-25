@@ -190,3 +190,22 @@ def generate_report(filename: str, data: dict):
         canvas.restoreState()
 
     doc.build(story, onFirstPage=on_page, onLaterPages=on_page)
+    if data.get("analyst_notes"):
+        story.append(Paragraph("Analyst Override & Manual Notes", section_style))
+        # Use a distinct background for manual notes to separate them from AI output
+        notes_table = Table(
+            [[Paragraph(data["analyst_notes"], body_style)]], colWidths=[6 * inch]
+        )
+        notes_table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#1e1e2e")),
+                    ("BOX", (0, 0), (-1, -1), 1, ACCENT_BLUE),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 15),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 15),
+                    ("TOPPADDING", (0, 0), (-1, -1), 15),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 15),
+                ]
+            )
+        )
+        story.append(notes_table)
