@@ -13,7 +13,7 @@ OLD_VECTORIZER_PATH = "models/tfidf.pkl"
 # Check if enhanced model exists
 if MODEL_PATH.exists():
     print("Loading enhanced ensemble model...")
-    from enhanced_classifier import EnhancedClassifier
+    from Phases.Phase5.enhanced_classifier import EnhancedClassifier
 
     classifier = EnhancedClassifier.load(MODEL_PATH)
     _use_enhanced = True

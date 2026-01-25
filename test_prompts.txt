@@ -5,3 +5,5 @@
 3. Automated alerts indicated outbound data transfers from a database server to an unfamiliar external IP address during early morning hours. The server is typically idle at this time. Initial review shows that the transfers were initiated using a service account with elevated privileges. No recent configuration changes were documented.
 
 4. Unrecognized authentication attempts and sensitive file access were observed on an internal server after midnight using a valid employee account, with no scheduled activity planned.
+
+5. During routine monitoring, repeated authentication attempts were observed on a file server at 12:30 AM. The attempts originated from a valid internal user account accessing sensitive directories.

@@ -24,8 +24,8 @@ warnings.filterwarnings("ignore")
 
 # Assuming enhanced modules are available
 try:
-    from enhanced_classifier import EnhancedClassifier
-    from enhanced_similarity import EnhancedSimilarityRecommender
+    from Phases.Phase5.enhanced_classifier import EnhancedClassifier
+    from Phases.Phase5.enhanced_similarity import EnhancedSimilarityRecommender
 
     ENHANCED_AVAILABLE = True
 except ImportError:
@@ -392,7 +392,7 @@ if __name__ == "__main__":
     print("TESTING TRAINED MODEL")
     print("=" * 70 + "\n")
 
-    from enhanced_classifier import EnhancedClassifier
+    from Phases.Phase5.enhanced_classifier import EnhancedClassifier
 
     # Load model
     model = EnhancedClassifier.load("./models/enhanced_tfidf_ensemble")

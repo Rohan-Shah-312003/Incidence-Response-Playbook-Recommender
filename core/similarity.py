@@ -46,7 +46,7 @@ RECOMMENDER_PATH = Path("models/enhanced_similarity")
 
 if RECOMMENDER_PATH.exists():
     print("Loading enhanced similarity recommender...")
-    from enhanced_similarity import EnhancedSimilarityRecommender
+    from Phases.Phase5.enhanced_similarity import EnhancedSimilarityRecommender
     
     _recommender = EnhancedSimilarityRecommender.load(RECOMMENDER_PATH)
     _use_enhanced_similarity = True
