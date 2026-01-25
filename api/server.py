@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from app.orchestrator import run_pipeline
 from core.report import generate_report
+import os
 
 app = FastAPI(
     title="IRPR – Incident Response Decision Engine",
@@ -67,7 +68,8 @@ class IncidentResponse(BaseModel):
 @app.post("/export")
 def export_report(req: IncidentRequest):
     result = run_pipeline(req.incident_text)
-    filename = "incident_report.pdf"
+    desktop_path = os.path.expanduser("~/Desktop")
+    filename = os.path.join(desktop_path, "incident_report.pdf")
     generate_report(filename, result)
     return {"status": "report generated", "file": filename}
 

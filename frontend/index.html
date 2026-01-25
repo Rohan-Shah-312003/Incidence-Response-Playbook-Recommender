@@ -1,98 +1,87 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>IRPR - Incident Response Assistant</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>IRPR | Enterprise Incident Response</title>
         <link rel="stylesheet" href="./styles.css">
-		<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-		<script src="renderer.js"></script>
-	</head>
-	<body>
-		<div class="container">
-			<header>
-				<h1>🛡️ IRPR</h1>
-				<p class="subtitle">
-					Intelligent Incident Response & Playbook Recommender
-				</p>
-			</header>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script src="renderer.js"></script>
+    </head>
+    <body>
+        <div class="app-shell">
+            <nav class="side-nav">
+                <div class="logo">🛡️<span>IRPR</span></div>
+                <div class="nav-status">
+                    <span class="status-indicator online"></span>
+                    SYSTEM READY
+                </div>
+            </nav>
 
-			<div class="input-section">
-				<label class="input-label">📝 Incident Description</label>
-				<textarea
-					id="incidentInput"
-					placeholder="Describe the security incident in detail... (e.g., unusual login attempts, suspicious email, data access anomalies)"
-				></textarea>
-				<button class="analyze-btn" onclick="analyze()" id="analyzeBtn">
-					🔍 Analyze Incident
-				</button>
-			</div>
+            <main class="main-content">
+                <header class="hero-header">
+                    <div class="header-text">
+                        <h1>Incident Response <span class="accent-text">& Playbook Recommender</span></h1>
+                        <p>AI-Powered Forensic Analysis & Remediation Strategy</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="export-btn" onclick="exportReport()">
+                            <span>Download PDF Report</span>
+                        </button>
+                    </div>
+                </header>
 
-			<div class="tabs-container">
-				<div class="tab-buttons">
-					<button
-						class="tab-btn active"
-						onclick="openTab('situation', event)"
-					>
-						📊 Situation
-					</button>
-					<button class="tab-btn" onclick="openTab('plan', event)">
-						📋 Response Plan
-					</button>
-					<button
-						class="tab-btn"
-						onclick="openTab('rationale', event)"
-					>
-						💡 Rationale
-					</button>
-					<button
-						class="tab-btn"
-						onclick="openTab('evidence', event)"
-					>
-						🔍 Evidence
-					</button>
-				</div>
+                <div class="dashboard-grid">
+                    <section class="panel input-panel">
+                        <div class="panel-header">
+                            <span class="panel-icon">📝</span>
+                            <h2>Incident Description</h2>
+                        </div>
+                        <div class="input-wrapper">
+                            <textarea id="incidentInput" placeholder="Awaiting raw logs or incident narrative..."></textarea>
+                            <div class="textarea-footer">
+                                <span class="char-count">Character-based context analysis active</span>
+                                <button class="analyze-btn" onclick="analyze()" id="analyzeBtn">
+                                    Run Analysis
+                                </button>
+                            </div>
+                        </div>
+                    </section>
 
-				<div id="situation" class="tab-content active">
-					<p
-						style="
-							color: #64748b;
-							text-align: center;
-							padding: 3rem;
-						"
-					>
-						👆 Enter an incident description and click "Analyze
-						Incident" to begin
-					</p>
-				</div>
+                    <section class="panel results-panel">
+                        <div class="tabs-header">
+                            <div class="tab-buttons">
+                                <button class="tab-btn active" onclick="openTab('situation', event)">Situation</button>
+                                <button class="tab-btn" onclick="openTab('plan', event)">Response Plan</button>
+                                <button class="tab-btn" onclick="openTab('rationale', event)">Rationale</button>
+                                <button class="tab-btn" onclick="openTab('evidence', event)">Evidence</button>
+                            </div>
+                        </div>
 
-				<div id="plan" class="tab-content">
-					<div id="planContent"></div>
-					<div class="override-section">
-						<h3>👤 Analyst Override</h3>
-						<textarea
-							id="overrideNote"
-							placeholder="Enter your analysis notes or corrections if you disagree with the automated recommendation..."
-						></textarea>
-						<button
-							class="secondary-btn"
-							onclick="submitOverride()"
-						>
-							Submit Override
-						</button>
-					</div>
-				</div>
+                        <div class="tab-viewport">
+                            <div id="situation" class="tab-content active">
+                                <div class="empty-state">
+                                    <div class="pulse-icon">🔍</div>
+                                    <p>Initialize analysis to populate incident intelligence.</p>
+                                </div>
+                            </div>
 
-				<div id="rationale" class="tab-content"></div>
-
-				<div id="evidence" class="tab-content"></div>
-			</div>
-
-			<div class="export-section">
-				<button class="export-btn" onclick="exportReport()">
-					📄 Export Report (PDF)
-				</button>
-			</div>
-		</div>
-	</body>
+                            <div id="plan" class="tab-content">
+                                <div id="planContent"></div>
+                                <div class="override-box">
+                                    <h3>Analyst Override</h3>
+                                    <textarea id="overrideNote" placeholder="Log manual adjustments here..."></textarea>
+                                    <button class="ghost-btn" onclick="submitOverride()">Commit Changes</button>
+                                </div>
+                            </div>
+                            <div id="rationale" class="tab-content"></div>
+                            <div id="evidence" class="tab-content"></div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </body>
 </html>
