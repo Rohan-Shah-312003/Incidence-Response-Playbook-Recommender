@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 	<head>
 		<meta charset="UTF-8" />
@@ -76,7 +76,95 @@
 				display: block;
 			}
 
-			/* ✅ NEW: Styling for override section inside plan tab */
+			/* ✅ NEW: Markdown styling for rendered content */
+			.markdown-content {
+				white-space: normal; /* Allow normal text wrapping for markdown */
+				line-height: 1.6;
+			}
+
+			.markdown-content h1,
+			.markdown-content h2,
+			.markdown-content h3 {
+				color: #60a5fa;
+				margin-top: 1em;
+				margin-bottom: 0.5em;
+			}
+
+			.markdown-content h1 {
+				font-size: 1.8em;
+				border-bottom: 2px solid #334155;
+				padding-bottom: 0.3em;
+			}
+
+			.markdown-content h2 {
+				font-size: 1.5em;
+			}
+
+			.markdown-content h3 {
+				font-size: 1.2em;
+			}
+
+			.markdown-content p {
+				margin: 0.8em 0;
+			}
+
+			.markdown-content ul,
+			.markdown-content ol {
+				margin: 0.8em 0;
+				padding-left: 2em;
+			}
+
+			.markdown-content li {
+				margin: 0.4em 0;
+			}
+
+			.markdown-content strong {
+				color: #fbbf24;
+				font-weight: bold;
+			}
+
+			.markdown-content em {
+				color: #a78bfa;
+				font-style: italic;
+			}
+
+			.markdown-content code {
+				background: #1e293b;
+				padding: 0.2em 0.4em;
+				border-radius: 3px;
+				font-family: "Courier New", monospace;
+				color: #34d399;
+			}
+
+			.markdown-content pre {
+				background: #1e293b;
+				padding: 1em;
+				border-radius: 5px;
+				overflow-x: auto;
+				margin: 1em 0;
+			}
+
+			.markdown-content pre code {
+				background: none;
+				padding: 0;
+			}
+
+			.markdown-content blockquote {
+				border-left: 4px solid #3b82f6;
+				padding-left: 1em;
+				margin: 1em 0;
+				color: #9ca3af;
+			}
+
+			.markdown-content a {
+				color: #60a5fa;
+				text-decoration: none;
+			}
+
+			.markdown-content a:hover {
+				text-decoration: underline;
+			}
+
 			.override-section {
 				margin-top: 20px;
 				padding-top: 20px;
@@ -97,7 +185,6 @@
 	<body>
 		<h2>IRPR – Incident Response Assistant</h2>
 
-		<!-- ✅ Input Section -->
 		<textarea
 			id="incidentInput"
 			placeholder="Paste incident description here..."
@@ -105,9 +192,11 @@
 
 		<button onclick="analyze()">Analyze Incident</button>
 
-		<!-- ✅ Tabs -->
 		<div class="tabs">
-			<button class="tab-btn active" onclick="openTab('situation', event)">
+			<button
+				class="tab-btn active"
+				onclick="openTab('situation', event)"
+			>
 				Situation
 			</button>
 			<button class="tab-btn" onclick="openTab('plan', event)">
@@ -121,16 +210,13 @@
 			</button>
 		</div>
 
-		<!-- ✅ Tab Content -->
 		<div id="situation" class="tab-content active">
 			Click "Analyze Incident" to begin...
 		</div>
-		
+
 		<div id="plan" class="tab-content">
-			<!-- Response plan will be populated here -->
 			<div id="planContent"></div>
-			
-			<!-- ✅ FIXED: Override section moved inside plan tab properly -->
+
 			<div class="override-section">
 				<h3>Analyst Override</h3>
 				<textarea
@@ -140,20 +226,18 @@
 				<button onclick="submitOverride()">Submit Override</button>
 			</div>
 		</div>
-		
-		<div id="rationale" class="tab-content">
-			<!-- Rationale will be populated here -->
-		</div>
-		
-		<div id="evidence" class="tab-content">
-			<!-- Evidence will be populated here -->
-		</div>
 
-		<!-- ✅ FIXED: Export button moved outside tabs -->
+		<div id="rationale" class="tab-content"></div>
+
+		<div id="evidence" class="tab-content"></div>
+
 		<div class="export-section">
 			<button onclick="exportReport()">Export Report (PDF)</button>
 		</div>
 
+		<!-- ✅ Load marked library BEFORE renderer.js -->
+		<!-- <script src="node_modules/marked/bin/marked.js"></script> -->
+		<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 		<script src="renderer.js"></script>
 	</body>
 </html>
