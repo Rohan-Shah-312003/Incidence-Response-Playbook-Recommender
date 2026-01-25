@@ -1,17 +1,54 @@
+"""
+Enhanced classifier using the new model architecture
+"""
+
 import joblib
+from pathlib import Path
 
-MODEL_PATH = "models/classifier.pkl"
-VECTORIZER_PATH = "models/tfidf.pkl"
+# Try to load enhanced model first, fall back to old model
+MODEL_PATH = Path("models/enhanced_tfidf")
+OLD_MODEL_PATH = "models/classifier.pkl"
+OLD_VECTORIZER_PATH = "models/tfidf.pkl"
 
-classifier = joblib.load(MODEL_PATH)
-vectorizer = joblib.load(VECTORIZER_PATH)
+# Check if enhanced model exists
+if MODEL_PATH.exists():
+    print("Loading enhanced ensemble model...")
+    from enhanced_classifier import EnhancedClassifier
+
+    classifier = EnhancedClassifier.load(MODEL_PATH)
+    _use_enhanced = True
+else:
+    print("Enhanced model not found, using legacy model...")
+    classifier = joblib.load(OLD_MODEL_PATH)
+    vectorizer = joblib.load(OLD_VECTORIZER_PATH)
+    _use_enhanced = False
+
 
 def classify_incident(text: str):
-    X = vectorizer.transform([text])
-    probs = classifier.predict_proba(X)[0]
+    """
+    Classify incident and return (label, confidence)
 
-    idx = probs.argmax()
-    label = classifier.classes_[idx]
-    confidence = probs[idx]
+    Args:
+        text: Incident description
+
+    Returns:
+        (predicted_label, confidence_score)
+    """
+    if _use_enhanced:
+        # Use enhanced model
+        label = classifier.predict([text])[0]
+        probs = classifier.predict_proba([text])[0]
+
+        # Get confidence for predicted label
+        label_idx = list(classifier.label_map.keys()).index(label)
+        confidence = probs[label_idx]
+    else:
+        # Use legacy model
+        X = vectorizer.transform([text])
+        probs = classifier.predict_proba(X)[0]
+
+        idx = probs.argmax()
+        label = classifier.classes_[idx]
+        confidence = probs[idx]
 
     return label, float(confidence)
