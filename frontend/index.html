@@ -28,16 +28,12 @@
 					<div class="header-text">
 						<h1>
 							Incident Response
-							<span class="accent-text"
-								>& Playbook Recommender</span
-							>
+							<span class="accent-text">& Playbook Recommender</span>
 						</h1>
-						<p>
-							AI-Powered Forensic Analysis & Remediation Strategy
-						</p>
+						<p>AI-Powered Forensic Analysis & Remediation Strategy</p>
 					</div>
 					<div class="header-actions">
-						<button class="export-btn" onclick="exportReport()">
+						<button class="export-btn analyze-btn" onclick="exportReport()">
 							<span>Download PDF Report</span>
 						</button>
 					</div>
@@ -56,14 +52,9 @@
 							></textarea>
 							<div class="textarea-footer">
 								<span class="char-count"
-									>Character-based context analysis
-									active</span
+									>Character-based context analysis active</span
 								>
-								<button
-									class="analyze-btn"
-									onclick="analyze()"
-									id="analyzeBtn"
-								>
+								<button class="analyze-btn" onclick="analyze()" id="analyzeBtn">
 									Run Analysis
 								</button>
 							</div>
@@ -79,22 +70,13 @@
 								>
 									Situation
 								</button>
-								<button
-									class="tab-btn"
-									onclick="openTab('plan', event)"
-								>
+								<button class="tab-btn" onclick="openTab('plan', event)">
 									Response Plan
 								</button>
-								<button
-									class="tab-btn"
-									onclick="openTab('rationale', event)"
-								>
+								<button class="tab-btn" onclick="openTab('rationale', event)">
 									Rationale
 								</button>
-								<button
-									class="tab-btn"
-									onclick="openTab('evidence', event)"
-								>
+								<button class="tab-btn" onclick="openTab('evidence', event)">
 									Evidence
 								</button>
 							</div>
@@ -104,10 +86,7 @@
 							<div id="situation" class="tab-content active">
 								<div class="empty-state">
 									<div class="pulse-icon">🔍</div>
-									<p>
-										Initialize analysis to populate incident
-										intelligence.
-									</p>
+									<p>Initialize analysis to populate incident intelligence.</p>
 								</div>
 							</div>
 
@@ -119,10 +98,7 @@
 										id="overrideNote"
 										placeholder="Log manual adjustments here..."
 									></textarea>
-									<button
-										class="ghost-btn"
-										onclick="submitOverride()"
-									>
+									<button class="ghost-btn analyze-btn" onclick="submitOverride()">
 										Commit Changes
 									</button>
 								</div>

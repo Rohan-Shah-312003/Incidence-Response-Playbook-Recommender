@@ -1,2 +1,3 @@
-uv run python -m uvicorn api.server:app --reload -> to start backend
+uv run python -m uvicorn api.server:app --reload -> to start backend (if using uv package manager)
+python -m uvicorn api.server:app --reload -> to start backend (if only using pip)
 npm start -> to run frontend
