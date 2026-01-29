@@ -208,6 +208,11 @@ class EnhancedSimilarityRecommender:
         """
         # Get hybrid similarity scores
         similarity_scores = self._hybrid_search(incident_text, top_k, alpha)
+        type_mask = (self.df["incident_type"] == incident_type).values
+    
+        # Boost matching types by 30% (tweak this value based on needs)
+        boost_factor = 1.3 
+        similarity_scores[type_mask] *= boost_factor
 
         # Apply time decay if enabled
         if self.time_decay_enabled and "timestamp" in self.df.columns:

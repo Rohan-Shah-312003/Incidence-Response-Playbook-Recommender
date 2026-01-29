@@ -2,19 +2,13 @@
 Expand dataset to include Malware, Ransomware, and DoS incidents
 This creates synthetic training data for the missing incident types.
 """
-
 import pandas as pd
 import numpy as np
 from uuid import uuid4
 import random
 
-# Set seed for reproducibility
 random.seed(42)
 np.random.seed(42)
-
-# ================================================================
-# INCIDENT TEMPLATES FOR MISSING TYPES
-# ================================================================
 
 MALWARE_TEMPLATES = [
     "Endpoint protection detected suspicious executable {} running with elevated privileges. Process attempted to modify system registry keys and establish persistence mechanisms.",
@@ -70,10 +64,6 @@ DOS_TEMPLATES = [
     "Financial services portal {} experiencing transaction failures. Low-and-slow HTTP attack maintaining {} connections to exhaust server thread pools.",
 ]
 
-# ================================================================
-# ARTIFACT NAMES FOR VARIETY
-# ================================================================
-
 MALWARE_ARTIFACTS = [
     "svchost32.exe", "updater.dll", "chrome_update.exe", "system32.scr",
     "java_installer.msi", "flash_player.exe", "winlogon.dll", "explorer32.exe",
@@ -96,10 +86,6 @@ SERVERS = [
     "SRV-SHARE-FINANCE", "SRV-BACKUP-01", "SRV-EMAIL-EXCH",
     "SRV-SQL-PROD", "SRV-VM-HOST-01", "SRV-DC-PRIMARY"
 ]
-
-# ================================================================
-# GENERATION FUNCTION
-# ================================================================
 
 def generate_synthetic_incidents(samples_per_type=3000):
     """
