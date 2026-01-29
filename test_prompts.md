@@ -4,6 +4,8 @@ Following the authentication attempts, anomalous log entries were generated indi
 
 The timing, access pattern, and deviation from the user’s historical behavior suggest potential account compromise or insider misuse, requiring immediate investigation.
 
+**Prompt** - During routine monitoring, the SOC team observed repeated authentication attempts on a file server at approximately 12:30 AM, outside normal business hours. The attempts originated from a valid internal user account that is not authorized to access the server. Shortly after, several unusual log entries were generated indicating access to sensitive directories. No scheduled maintenance or automated jobs were planned at this time.
+
 **Prompt** - An employee reported receiving an urgent email late at night claiming to be from the internal IT support team, warning of immediate account suspension unless password verification was completed. The email contained a hyperlink redirecting to an external website closely mimicking the corporate login portal, including similar branding and layout.
 
 Shortly after the report, multiple failed authentication attempts were observed on the employee’s account from unrecognized IP addresses, followed by account lockout triggers. No legitimate IT communications or password reset campaigns were active at the time.

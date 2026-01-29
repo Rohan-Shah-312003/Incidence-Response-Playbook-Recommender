@@ -5,7 +5,7 @@ function createWindow() {
 	const win = new BrowserWindow({
 		width: 1000,
 		height: 700,
-		icon: path.join(__dirname, "logo.ico"),
+		// icon: path.join(__dirname, "logo.ico"),
 		webPreferences: {
 			preload: path.join(__dirname, "preload.js"),
 			contextIsolation: true,
@@ -13,8 +13,10 @@ function createWindow() {
 		},
 	});
 
+	win.icon = path.join(__dirname, "logo.ico");
+
 	win.loadFile("index.html");
-	// win.webContents.openDevTools(); // for opening dev tools
+	// win.webContents.openDevTools(); // open dev tools
 }
 
 app.whenReady().then(createWindow);

@@ -1,7 +1,5 @@
-"""
-Enhanced Incident Classifier
-Supports: TF-IDF + Traditional ML, BERT, and Ensemble approaches
-"""
+# Enhanced Incident Classifier
+# TF-IDF + Traditional ML, BERT, and Ensemble approaches
 
 import pandas as pd
 import numpy as np
@@ -51,7 +49,7 @@ class EnhancedClassifier:
         self.reverse_label_map = {}
 
     def _create_tfidf_model(self):
-        """Create TF-IDF based ensemble model"""
+        # Create TF-IDF based ensemble model
         self.vectorizer = TfidfVectorizer(
             stop_words="english",
             ngram_range=(1, 3),  # Capture up to trigrams
@@ -81,7 +79,7 @@ class EnhancedClassifier:
         )
 
     def _create_bert_model(self, num_labels):
-        """Create BERT-based classifier"""
+        # Create BERT-based classifier
         model_name = "distilbert-base-uncased"
         self.bert_tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.bert_model = AutoModelForSequenceClassification.from_pretrained(
@@ -91,7 +89,6 @@ class EnhancedClassifier:
         )
 
     def _preprocess_for_bert(self, texts, labels=None):
-        """Tokenize texts for BERT"""
         encodings = self.bert_tokenizer(
             list(texts),
             truncation=True,

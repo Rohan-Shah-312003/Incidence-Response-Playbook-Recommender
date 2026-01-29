@@ -240,16 +240,65 @@ class EnhancedSimilarityRecommender:
         action_frequencies = {}
 
         # Map incident types to actions
+        # ACTION_MAP = {
+        #     "Phishing": ["IR-ID-01", "IR-CON-02", "IR-CON-03", "IR-POST-01"],
+        #     "Insider Misuse": ["IR-ID-01", "IR-ID-02", "IR-CON-02", "IR-POST-01"],
+        #     "Data Breach": ["IR-ID-01", "IR-CON-01", "IR-ERAD-01", "IR-POST-01"],
+        #     "Malware": ["IR-ID-01", "IR-CON-01", "IR-ERAD-01", "IR-REC-01"],
+        #     "Ransomware": [
+        #         "IR-ID-01",
+        #         "IR-CON-01",
+        #         "IR-ERAD-01",
+        #         "IR-REC-01",
+        #         "IR-POST-01",
+        #     ],
+        # }
         ACTION_MAP = {
-            "Phishing": ["IR-ID-01", "IR-CON-02", "IR-CON-03", "IR-POST-01"],
-            "Insider Misuse": ["IR-ID-01", "IR-ID-02", "IR-CON-02", "IR-POST-01"],
-            "Data Breach": ["IR-ID-01", "IR-CON-01", "IR-ERAD-01", "IR-POST-01"],
-            "Malware": ["IR-ID-01", "IR-CON-01", "IR-ERAD-01", "IR-REC-01"],
+            "Phishing": [
+                "IR-ID-01",
+                "IR-CON-02",
+                "IR-CON-03",
+                "IR-ERAD-01",
+                "IR-POST-01",
+                "IR-POST-02",
+            ],
+            "Insider Misuse": [
+                "IR-ID-01",
+                "IR-ID-02",
+                "IR-CON-02",
+                "IR-ERAD-02",
+                "IR-POST-01",
+                "IR-POST-02",
+            ],
+            "Data Breach": [
+                "IR-ID-01",
+                "IR-ID-02",
+                "IR-CON-01",
+                "IR-ERAD-01",
+                "IR-ERAD-02",
+                "IR-POST-01",
+            ],
+            "Malware": [
+                "IR-ID-01",
+                "IR-ID-02",
+                "IR-CON-01",
+                "IR-ERAD-01",
+                "IR-REC-01",
+                "IR-POST-01",
+            ],
             "Ransomware": [
                 "IR-ID-01",
                 "IR-CON-01",
                 "IR-ERAD-01",
                 "IR-REC-01",
+                "IR-REC-02",
+                "IR-POST-01",
+            ],
+            "Denial of Service": [
+                "IR-ID-01",
+                "IR-CON-01",
+                "IR-REC-01",
+                "IR-REC-02",
                 "IR-POST-01",
             ],
         }

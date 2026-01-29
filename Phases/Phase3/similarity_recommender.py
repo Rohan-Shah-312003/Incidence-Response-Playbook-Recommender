@@ -34,7 +34,7 @@ def recommend_actions(text: str, top_k: int = 5):
         # text = df.iloc[idx]["text"][:120] + "..."
 
         # supporting_incidents.append((label, sim, text))
-        # total_similarity += sim
+        total_similarity += sim
 
         for action in ACTION_MAP.get(label, []):
             action_scores[action] = action_scores.get(action, 0) + sim

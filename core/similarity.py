@@ -1,5 +1,6 @@
 """
 Enhanced similarity recommender using sentence embeddings
+UPDATED: Now supports all 6 incident types with expanded action mappings
 """
 
 import pandas as pd
@@ -20,7 +21,7 @@ PHASE_ORDER = {
     "Containment": 2,
     "Eradication": 3,
     "Recovery": 4,
-    "Post-Incident": 5
+    "Post-Incident": 5,
 }
 
 PHASE_WEIGHTS = {
@@ -31,14 +32,90 @@ PHASE_WEIGHTS = {
     "Post-Incident": 0.4,
 }
 
-# Action mapping by incident type
+# ================================================================
+# EXPANDED ACTION MAPPING - ALL 6 INCIDENT TYPES
+# Maps each incident type to appropriate response actions
+# ================================================================
+
 ACTION_MAP = {
-    "Phishing": ["IR-ID-01", "IR-CON-02", "IR-CON-03", "IR-ERAD-01", "IR-POST-01", "IR-POST-02"],
-    "Insider Misuse": ["IR-ID-01", "IR-ID-02", "IR-CON-02", "IR-ERAD-02", "IR-POST-01", "IR-POST-02"],
-    "Data Breach": ["IR-ID-01", "IR-ID-02", "IR-CON-01", "IR-ERAD-01", "IR-ERAD-02", "IR-POST-01"],
-    "Malware": ["IR-ID-01", "IR-ID-02", "IR-CON-01", "IR-ERAD-01", "IR-REC-01", "IR-POST-01"],
-    "Ransomware": ["IR-ID-01", "IR-CON-01", "IR-ERAD-01", "IR-REC-01", "IR-REC-02", "IR-POST-01"],
-    "Denial of Service": ["IR-ID-01", "IR-CON-01", "IR-REC-01", "IR-REC-02", "IR-POST-01"]
+    "Phishing": [
+        "IR-ID-01",  # Confirm incident scope
+        "IR-ID-02",  # Preserve incident evidence
+        "IR-CON-02",  # Disable compromised account
+        "IR-CON-03",  # Notify affected user
+        "IR-ERAD-01",  # Remove malicious artifacts (phishing emails)
+        "IR-ERAD-02",  # Reset credentials and access keys
+        "IR-POST-01",  # Conduct post-incident review
+        "IR-POST-02",  # Update security awareness and controls
+        "IR-POST-03",  # Update threat intelligence
+    ],
+    "Insider Misuse": [
+        "IR-ID-01",  # Confirm incident scope
+        "IR-ID-02",  # Preserve incident evidence
+        "IR-CON-01",  # Isolate affected system or account
+        "IR-CON-02",  # Disable compromised account
+        "IR-ERAD-02",  # Reset credentials and access keys
+        "IR-REC-01",  # Validate system integrity
+        "IR-POST-01",  # Conduct post-incident review
+        "IR-POST-02",  # Update security awareness and controls
+        "IR-POST-04",  # Compliance and regulatory reporting
+    ],
+    "Data Breach": [
+        "IR-ID-01",  # Confirm incident scope
+        "IR-ID-02",  # Preserve incident evidence
+        "IR-CON-01",  # Isolate affected system or account
+        "IR-CON-05",  # Block malicious infrastructure
+        "IR-ERAD-01",  # Remove malicious artifacts
+        "IR-ERAD-02",  # Reset credentials and access keys
+        "IR-REC-01",  # Validate system integrity
+        "IR-REC-04",  # Implement enhanced monitoring
+        "IR-POST-01",  # Conduct post-incident review
+        "IR-POST-03",  # Update threat intelligence
+        "IR-POST-04",  # Compliance and regulatory reporting
+    ],
+    "Malware": [
+        "IR-ID-01",  # Confirm incident scope
+        "IR-ID-02",  # Preserve incident evidence
+        "IR-ID-03",  # Identify malware variant and indicators
+        "IR-CON-01",  # Isolate affected system or account
+        "IR-CON-04",  # Implement network segmentation
+        "IR-CON-05",  # Block malicious infrastructure (C2 servers)
+        "IR-ERAD-01",  # Remove malicious artifacts (malware files)
+        "IR-ERAD-03",  # Patch vulnerabilities
+        "IR-ERAD-04",  # Remove persistence mechanisms
+        "IR-REC-01",  # Validate system integrity
+        "IR-REC-04",  # Implement enhanced monitoring
+        "IR-POST-01",  # Conduct post-incident review
+        "IR-POST-03",  # Update threat intelligence
+    ],
+    "Ransomware": [
+        "IR-ID-01",  # Confirm incident scope
+        "IR-ID-02",  # Preserve incident evidence
+        "IR-CON-01",  # Isolate affected system (prevent spread)
+        "IR-CON-04",  # Implement network segmentation
+        "IR-CON-05",  # Block malicious infrastructure
+        "IR-CON-06",  # Disable vulnerable services
+        "IR-ERAD-01",  # Remove malicious artifacts
+        "IR-ERAD-04",  # Remove persistence mechanisms
+        "IR-REC-01",  # Validate system integrity
+        "IR-REC-03",  # Restore from clean backups
+        "IR-REC-04",  # Implement enhanced monitoring
+        "IR-POST-01",  # Conduct post-incident review
+        "IR-POST-03",  # Update threat intelligence
+        "IR-POST-04",  # Compliance and regulatory reporting
+    ],
+    "Denial of Service": [
+        "IR-ID-01",  # Confirm incident scope
+        "IR-CON-01",  # Isolate affected system (implement filtering)
+        "IR-CON-04",  # Implement network segmentation
+        "IR-CON-05",  # Block malicious infrastructure (attack sources)
+        "IR-REC-01",  # Validate system integrity
+        "IR-REC-02",  # Restore normal operations
+        "IR-REC-04",  # Implement enhanced monitoring
+        "IR-POST-01",  # Conduct post-incident review
+        "IR-POST-02",  # Update security controls
+        "IR-POST-03",  # Update threat intelligence
+    ],
 }
 
 # Try to load enhanced recommender
@@ -46,37 +123,63 @@ RECOMMENDER_PATH = Path("models/enhanced_similarity")
 
 if RECOMMENDER_PATH.exists():
     print("Loading enhanced similarity recommender...")
-    from Phases.Phase5.enhanced_similarity import EnhancedSimilarityRecommender
-    
-    _recommender = EnhancedSimilarityRecommender.load(RECOMMENDER_PATH)
-    _use_enhanced_similarity = True
+    try:
+        from Phases.Phase5.enhanced_similarity import EnhancedSimilarityRecommender
+
+        _recommender = EnhancedSimilarityRecommender.load(RECOMMENDER_PATH)
+        _use_enhanced_similarity = True
+    except ImportError:
+        print("  ⚠️  Could not import EnhancedSimilarityRecommender")
+        _use_enhanced_similarity = False
 else:
     print("Enhanced recommender not found, using legacy approach...")
-    # Legacy approach
-    DATA_PATH = "./data/real_incidents_balanced.csv"
-    VECTORIZER_PATH = "./models/tfidf.pkl"
-    
-    vectorizer = joblib.load(VECTORIZER_PATH)
-    df = pd.read_csv(DATA_PATH)
-    X_hist = vectorizer.transform(df["text"])
     _use_enhanced_similarity = False
 
+# Legacy approach setup
+if not _use_enhanced_similarity:
+    # Try to load data and vectorizer for legacy mode
+    data_paths = [
+        "./data/real_incidents_expanded.csv",
+        "./data/real_incidents_balanced.csv",
+        "../../data/real_incidents_expanded.csv",
+        "../../data/real_incidents_balanced.csv",
+    ]
 
-def recommend_actions(
-    text: str, 
-    incident_type: str, 
-    cls_conf: float, 
-    top_k: int = 5
-):
+    VECTORIZER_PATH = "./models/tfidf.pkl"
+
+    df = None
+    vectorizer = None
+    X_hist = None
+
+    try:
+        vectorizer = joblib.load(VECTORIZER_PATH)
+
+        for data_path in data_paths:
+            try:
+                df = pd.read_csv(data_path)
+                X_hist = vectorizer.transform(df["text"])
+                print(f"  ✓ Loaded data from: {data_path}")
+                break
+            except FileNotFoundError:
+                continue
+
+        if df is None:
+            print(f"  ⚠️  Warning: No training data found.")
+            print(f"  Please run: python expand_dataset.py")
+    except FileNotFoundError:
+        print(f"  ⚠️  Warning: Vectorizer not found at {VECTORIZER_PATH}")
+
+
+def recommend_actions(text: str, incident_type: str, cls_conf: float, top_k: int = 5):
     """
     Recommend response actions based on incident similarity
-    
+
     Args:
         text: Incident description
         incident_type: Predicted incident type
         cls_conf: Classification confidence
         top_k: Number of similar incidents to retrieve
-        
+
     Returns:
         (recommended_actions, similar_incidents)
     """
@@ -86,7 +189,7 @@ def recommend_actions(
             incident_text=text,
             incident_type=incident_type,
             classification_confidence=cls_conf,
-            top_k=top_k
+            top_k=top_k,
         )
     else:
         # Legacy approach
@@ -95,6 +198,12 @@ def recommend_actions(
 
 def _legacy_recommend(text: str, incident_type: str, cls_conf: float, top_k: int = 5):
     """Legacy recommendation approach (TF-IDF based)"""
+
+    # Fallback if data not loaded
+    if df is None or vectorizer is None or X_hist is None:
+        print("  ⚠️  Using rule-based fallback (no historical data)")
+        return _rule_based_fallback(incident_type), []
+
     x_new = vectorizer.transform([text])
     similarities = cosine_similarity(x_new, X_hist)[0]
 
@@ -114,8 +223,9 @@ def _legacy_recommend(text: str, incident_type: str, cls_conf: float, top_k: int
 
         for action_id in ACTION_MAP.get(label, []):
             if action_id not in ACTION_KB:
+                print(f"  ⚠️  Warning: Action {action_id} not in knowledge base")
                 continue
-                
+
             phase = ACTION_KB[action_id]["phase"]
             phase_weight = PHASE_WEIGHTS.get(phase, 0.5)
 
@@ -142,3 +252,34 @@ def _legacy_recommend(text: str, incident_type: str, cls_conf: float, top_k: int
     ranked_actions.sort(key=lambda x: (x["phase_rank"], -x["confidence"]))
 
     return ranked_actions, similar_incidents
+
+
+def _rule_based_fallback(incident_type: str):
+    """
+    Rule-based fallback when no historical data is available
+    Returns actions based purely on incident type
+    """
+    actions_for_type = ACTION_MAP.get(incident_type, [])
+
+    ranked_actions = []
+    for i, action_id in enumerate(actions_for_type):
+        if action_id not in ACTION_KB:
+            continue
+
+        phase = ACTION_KB[action_id]["phase"]
+        phase_rank = PHASE_ORDER.get(phase, 99)
+
+        # Assign decreasing confidence based on position
+        confidence = 100.0 - (i * 5)  # 100, 95, 90, 85, ...
+
+        ranked_actions.append(
+            {
+                "action_id": action_id,
+                "confidence": max(50.0, confidence),  # Minimum 50%
+                "phase": phase,
+                "phase_rank": phase_rank,
+            }
+        )
+
+    ranked_actions.sort(key=lambda x: (x["phase_rank"], -x["confidence"]))
+    return ranked_actions
