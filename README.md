@@ -804,12 +804,6 @@ SOFTWARE.
 
 ---
 
-## 👥 Authors
-
-- **Original Developer** - Initial work and Phase 1-4
-- **Enhanced Version** - ML improvements and modern UI
-
----
 
 ## 🙏 Acknowledgments
 
