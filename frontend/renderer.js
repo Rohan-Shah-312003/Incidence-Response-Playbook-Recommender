@@ -19,24 +19,6 @@ function openTab(tabId, evt) {
 	if (evt && evt.target) evt.target.classList.add("active");
 }
 
-// function openTab(tabId, event) {
-// 	// 1. Hide all tab contents
-// 	const contents = document.getElementsByClassName("tab-content");
-// 	for (let i = 0; i < contents.length; i++) {
-// 		contents[i].classList.remove("active");
-// 	}
-
-// 	// 2. Remove 'active' class from all buttons
-// 	const buttons = document.getElementsByClassName("tab-btn");
-// 	for (let i = 0; i < buttons.length; i++) {
-// 		buttons[i].classList.remove("active");
-// 	}
-
-// 	// 3. Show the current tab and add 'active' class to the button
-// 	document.getElementById(tabId).classList.add("active");
-// 	event.currentTarget.classList.add("active");
-// }
-
 async function analyze() {
 	const input = document.getElementById("incidentInput").value;
 	if (!input.trim()) {

@@ -1,5 +1,4 @@
 const { contextBridge, ipcRenderer } = require("electron");
-// const { marked } = require("marked");
 
 contextBridge.exposeInMainWorld("api", {
 	analyzeIncident: async (text) => {

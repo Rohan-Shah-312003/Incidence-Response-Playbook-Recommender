@@ -19,11 +19,15 @@
 
 /* style.css */
 #title-bar.dark-theme {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	height: 3rem;
-	background: transparent;
+	background: var(--bg-dark);
 	margin: 0rem 2rem 0 2rem;
 	-webkit-app-region: drag;
 	font-family: "Plus Jakarta Sans", sans-serif;
