@@ -1,451 +1,842 @@
+# """
+# Alternative DDoS incident scraper using RSS feeds and multiple sources
+
+# This approach is more reliable than HTML scraping because:
+# - RSS feeds are more stable
+# - Multiple sources = more data
+# - Structured XML parsing
+# """
+
+# import requests
+# from bs4 import BeautifulSoup
+# import pandas as pd
+# import time
+# from datetime import datetime
+# import xml.etree.ElementTree as ET
+# from pathlib import Path
+# import re
+
+# OUTPUT_PATH = "data/scraped_incidents/ddos_incidents_multi_source.csv"
+# DELAY_SECONDS = 2
+
+
+# def scrape_cloudflare_rss():
+#     """
+#     Scrape Cloudflare blog RSS feed for DDoS articles
+#     More reliable than HTML scraping
+#     """
+#     incidents = []
+
+#     print("Fetching Cloudflare DDoS articles via RSS...")
+
+#     # Cloudflare blog RSS feed
+#     rss_url = "https://blog.cloudflare.com/rss/"
+
+#     try:
+#         response = requests.get(rss_url, timeout=15)
+#         response.raise_for_status()
+
+#         # Parse RSS XML
+#         root = ET.fromstring(response.content)
+
+#         # Find all items (articles)
+#         for item in root.findall(".//item"):
+#             title = item.find("title").text if item.find("title") is not None else ""
+#             link = item.find("link").text if item.find("link") is not None else ""
+#             description = (
+#                 item.find("description").text
+#                 if item.find("description") is not None
+#                 else ""
+#             )
+#             pub_date = (
+#                 item.find("pubDate").text if item.find("pubDate") is not None else ""
+#             )
+
+#             # Check if article is about DDoS
+#             title_lower = title.lower()
+#             desc_lower = description.lower() if description else ""
+
+#             if any(
+#                 keyword in title_lower or keyword in desc_lower
+#                 for keyword in ["ddos", "denial of service", "attack", "mitigation"]
+#             ):
+#                 # Clean HTML from description
+#                 if description:
+#                     clean_desc = BeautifulSoup(description, "html.parser").get_text()
+
+#                     if len(clean_desc) > 100:
+#                         incidents.append(
+#                             {
+#                                 "text": clean_desc,
+#                                 "incident_type": "Denial of Service",
+#                                 "source": "Cloudflare Blog RSS",
+#                                 "article_title": title,
+#                                 "source_url": link,
+#                                 "date": pub_date,
+#                             }
+#                         )
+
+#         print(f"  ✓ Found {len(incidents)} DDoS-related articles")
+
+#     except Exception as e:
+#         print(f"  Error fetching RSS: {e}")
+
+#     return incidents
+
+
+# def scrape_akamai_threats():
+#     """
+#     Scrape Akamai threat research for DDoS incidents
+#     Akamai publishes excellent DDoS attack reports
+#     """
+#     incidents = []
+
+#     print("\nFetching Akamai threat reports...")
+
+#     # Akamai threat research blog
+#     url = "https://www.akamai.com/blog/security"
+
+#     headers = {
+#         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+#     }
+
+#     try:
+#         response = requests.get(url, headers=headers, timeout=15)
+#         response.raise_for_status()
+
+#         soup = BeautifulSoup(response.content, "html.parser")
+
+#         # Find article previews
+#         articles = soup.find_all(
+#             ["article", "div"], class_=re.compile("post|article|card")
+#         )
+
+#         for article in articles[:20]:  # Process first 20
+#             title_elem = article.find(["h2", "h3", "h4"])
+#             if not title_elem:
+#                 continue
+
+#             title = title_elem.get_text(strip=True)
+
+#             # Check if DDoS-related
+#             if any(
+#                 keyword in title.lower()
+#                 for keyword in ["ddos", "denial", "attack", "botnet"]
+#             ):
+#                 # Get description/excerpt
+#                 desc_elem = article.find("p")
+#                 if desc_elem:
+#                     text = desc_elem.get_text(strip=True)
+
+#                     if len(text) > 80:
+#                         # Get link
+#                         link_elem = article.find("a", href=True)
+#                         link = link_elem["href"] if link_elem else ""
+#                         if link and not link.startswith("http"):
+#                             link = "https://www.akamai.com" + link
+
+#                         incidents.append(
+#                             {
+#                                 "text": text,
+#                                 "incident_type": "Denial of Service",
+#                                 "source": "Akamai Security Blog",
+#                                 "article_title": title,
+#                                 "source_url": link,
+#                                 "date": "",
+#                             }
+#                         )
+
+#         print(f"  ✓ Found {len(incidents)} DDoS incidents")
+
+#     except Exception as e:
+#         print(f"  Error: {e}")
+
+#     time.sleep(DELAY_SECONDS)
+#     return incidents
+
+
+# def scrape_arbor_networks():
+#     """
+#     Scrape Arbor Networks (NETSCOUT) DDoS reports
+#     Industry leader in DDoS protection - excellent data
+#     """
+#     incidents = []
+
+#     print("\nFetching NETSCOUT/Arbor DDoS reports...")
+
+#     url = "https://www.netscout.com/blog/asert"
+
+#     headers = {
+#         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+#     }
+
+#     try:
+#         response = requests.get(url, headers=headers, timeout=15)
+#         response.raise_for_status()
+
+#         soup = BeautifulSoup(response.content, "html.parser")
+
+#         # Find blog articles
+#         articles = soup.find_all(
+#             ["article", "div"], class_=re.compile("post|blog|article")
+#         )
+
+#         for article in articles[:20]:
+#             title_elem = article.find(["h2", "h3", "a"])
+#             if not title_elem:
+#                 continue
+
+#             title = title_elem.get_text(strip=True)
+
+#             if any(
+#                 keyword in title.lower()
+#                 for keyword in ["ddos", "attack", "amplification", "reflection"]
+#             ):
+#                 desc_elem = article.find("p")
+#                 if desc_elem:
+#                     text = desc_elem.get_text(strip=True)
+
+#                     if len(text) > 80:
+#                         link_elem = article.find("a", href=True)
+#                         link = link_elem["href"] if link_elem else ""
+#                         if link and not link.startswith("http"):
+#                             link = "https://www.netscout.com" + link
+
+#                         incidents.append(
+#                             {
+#                                 "text": text,
+#                                 "incident_type": "Denial of Service",
+#                                 "source": "NETSCOUT ASERT Blog",
+#                                 "article_title": title,
+#                                 "source_url": link,
+#                                 "date": "",
+#                             }
+#                         )
+
+#         print(f"  ✓ Found {len(incidents)} DDoS incidents")
+
+#     except Exception as e:
+#         print(f"  Error: {e}")
+
+#     time.sleep(DELAY_SECONDS)
+#     return incidents
+
+
+# def generate_realistic_ddos_incidents(count=300):
+#     """
+#     Generate realistic DDoS incidents based on actual attack patterns
+
+#     Uses real attack characteristics from industry reports
+#     """
+#     print(f"\nGenerating {count} realistic DDoS incidents...")
+
+#     # Real attack patterns from NETSCOUT/Cloudflare reports
+#     attack_templates = [
+#         # Volumetric attacks
+#         "Network monitoring detected {volume} Gbps volumetric attack targeting {target}, {protocol} flood originated from {source}, lasting {duration}.",
+#         # Amplification attacks
+#         "{protocol} amplification attack leveraged {count} reflectors to amplify traffic by {factor}x, peak bandwidth reached {volume} Gbps against {asset}.",
+#         # Application layer
+#         "Application layer attack overwhelmed {service} with {rps} requests per second, {technique} exploitation caused {impact}, mitigation engaged after {delay}.",
+#         # Multi-vector
+#         "Multi-vector DDoS campaign combined {vector1}, {vector2}, and {vector3}, targeting {target} infrastructure, total attack volume {volume} Gbps.",
+#         # Protocol attacks
+#         "{protocol} flood attack consumed server resources with {pps} packets per second, connection table exhaustion affected {count} legitimate users.",
+#         # Botnet attacks
+#         "Botnet comprising {botnet_size} compromised devices launched {attack_type} attack, distributed sources across {countries} countries, sustained for {duration}.",
+#         # Reflection attacks
+#         "DNS reflection attack using {count} open resolvers generated {qps} million queries per second, targeting authoritative nameservers of {target}.",
+#         # Layer 7 attacks
+#         "Layer 7 attack exploited {vulnerability} in {service}, slowloris technique maintained {connections} concurrent connections, degraded response time to {latency}.",
+#         # SYN floods
+#         "SYN flood attack initiated {pps} million packets per second against edge infrastructure, half-open connections depleted {resource}, {duration} service disruption.",
+#         # UDP floods
+#         "UDP flood targeted {port} with randomized payloads at {pps} million PPS, saturated {bandwidth} of available bandwidth, forced traffic blackholing.",
+#         # Memcached amplification
+#         "Memcached amplification attack achieved {factor}x amplification factor using {count} exposed servers, peak attack size {volume} Tbps, unprecedented scale.",
+#         # NTP amplification
+#         "NTP amplification leveraged monlist command on {count} vulnerable servers, generated {volume} Gbps attacking {target}, {duration} outage resulted.",
+#     ]
+
+#     # Real-world attack characteristics
+#     import random
+
+#     protocols = [
+#         "UDP",
+#         "TCP",
+#         "ICMP",
+#         "DNS",
+#         "NTP",
+#         "SSDP",
+#         "memcached",
+#         "CLDAP",
+#         "LDAP",
+#     ]
+#     targets = [
+#         "customer API gateway",
+#         "public DNS infrastructure",
+#         "web application cluster",
+#         "edge routers",
+#         "content delivery network",
+#         "authentication service",
+#     ]
+#     assets = [
+#         "public-facing web servers",
+#         "DNS resolvers",
+#         "API endpoints",
+#         "edge network",
+#         "load balancers",
+#     ]
+#     sources = [
+#         "Mirai botnet variant",
+#         "geographically distributed botnet",
+#         "compromised IoT devices",
+#         "cloud-based attack infrastructure",
+#         "residential proxy network",
+#     ]
+#     services = [
+#         "authentication API",
+#         "content management system",
+#         "e-commerce platform",
+#         "customer portal",
+#         "payment processing gateway",
+#     ]
+#     techniques = [
+#         "HTTP POST flood",
+#         "Slowloris",
+#         "R-U-Dead-Yet",
+#         "cache bypass",
+#         "WordPress pingback",
+#         "XML-RPC amplification",
+#     ]
+#     vulnerabilities = [
+#         "keep-alive abuse",
+#         "connection pooling exhaustion",
+#         "SSL/TLS handshake flood",
+#         "regex DoS",
+#         "algorithmic complexity",
+#     ]
+#     resources = [
+#         "connection tracking table",
+#         "NAT translation entries",
+#         "session state memory",
+#         "CPU cycles",
+#         "bandwidth capacity",
+#     ]
+
+#     incidents = []
+
+#     for _ in range(count):
+#         template = random.choice(attack_templates)
+
+#         incident_text = template.format(
+#             volume=random.choice(
+#                 [
+#                     random.randint(50, 400),
+#                     random.randint(400, 800),
+#                     random.randint(1, 3) * 1000,
+#                 ]
+#             ),
+#             target=random.choice(targets),
+#             protocol=random.choice(protocols),
+#             source=random.choice(sources),
+#             duration=random.choice(
+#                 [
+#                     f"{random.randint(1, 4)} hours",
+#                     f"{random.randint(30, 180)} minutes",
+#                     f"{random.randint(5, 12)} hours",
+#                 ]
+#             ),
+#             count=f"{random.randint(10, 500)}K"
+#             if random.random() > 0.3
+#             else f"{random.randint(1, 50)}M",
+#             factor=random.randint(10, 51000),
+#             asset=random.choice(assets),
+#             service=random.choice(services),
+#             rps=f"{random.randint(100, 900)}K"
+#             if random.random() > 0.5
+#             else f"{random.randint(1, 20)}M",
+#             technique=random.choice(techniques),
+#             impact=random.choice(
+#                 [
+#                     "complete service outage",
+#                     "severe performance degradation",
+#                     "500 errors for legitimate traffic",
+#                     "timeouts across all endpoints",
+#                 ]
+#             ),
+#             delay=f"{random.randint(2, 15)} minutes",
+#             vector1=random.choice(protocols) + " flood",
+#             vector2=random.choice(techniques),
+#             vector3=random.choice(["SYN flood", "ACK flood", "RST flood", "FIN flood"]),
+#             pps=f"{random.randint(10, 500)}M",
+#             botnet_size=f"{random.randint(50, 500)}K"
+#             if random.random() > 0.3
+#             else f"{random.randint(1, 10)}M",
+#             attack_type=random.choice(
+#                 ["volumetric", "application-layer", "protocol", "hybrid"]
+#             ),
+#             countries=random.randint(50, 180),
+#             qps=random.randint(10, 200),
+#             vulnerability=random.choice(vulnerabilities),
+#             connections=f"{random.randint(10, 500)}K",
+#             latency=f"{random.randint(10, 60)} seconds",
+#             resource=random.choice(resources),
+#             bandwidth=f"{random.randint(70, 100)}%",
+#             port=random.choice(
+#                 ["53/UDP", "80/TCP", "443/TCP", "123/UDP", "1900/UDP", "11211/UDP"]
+#             ),
+#         )
+
+#         incidents.append(
+#             {
+#                 "text": incident_text,
+#                 "incident_type": "Denial of Service",
+#                 "source": "Synthetic-Realistic",
+#                 "article_title": "Generated from industry patterns",
+#                 "source_url": "",
+#                 "date": "",
+#             }
+#         )
+
+#     print(f"  ✓ Generated {len(incidents)} incidents")
+#     return incidents
+
+
+# def main():
+#     """
+#     Collect DDoS incidents from multiple sources
+#     """
+#     print("=" * 70)
+#     print("MULTI-SOURCE DDOS INCIDENT COLLECTOR")
+#     print("=" * 70)
+#     print()
+
+#     all_incidents = []
+
+#     # Method 1: Cloudflare RSS (most reliable)
+#     all_incidents.extend(scrape_cloudflare_rss())
+#     time.sleep(DELAY_SECONDS)
+
+#     # Method 2: Akamai blog
+#     all_incidents.extend(scrape_akamai_threats())
+
+#     # Method 3: NETSCOUT/Arbor
+#     all_incidents.extend(scrape_arbor_networks())
+
+#     # Method 4: Generate realistic synthetic to supplement
+#     scraped_count = len(all_incidents)
+#     print(f"\nTotal scraped: {scraped_count} incidents")
+
+#     if scraped_count < 400:
+#         needed = 400 - scraped_count
+#         all_incidents.extend(generate_realistic_ddos_incidents(needed))
+
+#     # Create DataFrame
+#     df = pd.DataFrame(all_incidents)
+
+#     # Remove duplicates
+#     initial_len = len(df)
+#     df = df.drop_duplicates(subset=["text"])
+
+#     print()
+#     print("=" * 70)
+#     print("COLLECTION SUMMARY")
+#     print("=" * 70)
+#     print(f"Total incidents: {initial_len}")
+#     print(f"After deduplication: {len(df)}")
+#     print()
+#     print("Source breakdown:")
+#     print(df["source"].value_counts())
+
+#     # Save
+#     Path(OUTPUT_PATH).parent.mkdir(parents=True, exist_ok=True)
+#     df.to_csv(OUTPUT_PATH, index=False)
+
+#     print()
+#     print(f"✓ Saved to: {OUTPUT_PATH}")
+
+#     # Show samples
+#     print()
+#     print("=" * 70)
+#     print("SAMPLE INCIDENTS")
+#     print("=" * 70)
+
+#     for idx, row in df.head(5).iterrows():
+#         print(f"\n{idx + 1}. [{row['source']}]")
+#         print(f"   {row['text'][:250]}...")
+
+#     print()
+#     print("=" * 70)
+#     print("✓ DDoS incident collection complete!")
+#     print("=" * 70)
+#     print()
+#     print("Next steps:")
+#     print("  1. Review the output file")
+#     print("  2. Merge with other incident types:")
+#     print("     python merge_all_datasets.py")
+
+
+# if __name__ == "__main__":
+#     main()
+
+
 """
-Scrape DDoS incident narratives from Cloudflare blog
-
-Cloudflare publishes detailed DDoS attack reports with:
-- Attack descriptions
-- Traffic volumes
-- Attack vectors
-- Mitigation strategies
-
-This is perfect for training your DoS/DDoS classifier.
+Enhanced DDoS Incident Scraper
+- Better HTML parsing
+- More sources
+- PDF report extraction
+- Fallback to LLM-based realistic generation (only if needed)
 """
 
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import time
-from datetime import datetime
-import re
 from pathlib import Path
+import re
+from datetime import datetime
 
-# Configuration
-BASE_URL = "https://blog.cloudflare.com"
-DDOS_TAG_URL = "https://blog.cloudflare.com/tag/ddos/"
-OUTPUT_PATH = "./data/cloudflare_ddos/cloudflare_ddos_incidents.csv"
-DELAY_SECONDS = 1  # Be respectful with scraping
+OUTPUT_PATH = "data/scraped_incidents/ddos_incidents_enhanced.csv"
+DELAY_SECONDS = 3
 
-# Headers to mimic browser
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.5",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 }
 
 
-def get_article_urls(max_pages=5):
+def scrape_cloudflare_blog_direct(max_articles=50):
     """
-    Get list of DDoS-related article URLs from Cloudflare blog
-
-    Args:
-        max_pages: Number of tag pages to scrape
-
-    Returns:
-        List of article URLs
-    """
-    article_urls = []
-
-    print(f"Collecting article URLs from {DDOS_TAG_URL}...")
-
-    for page in range(1, max_pages + 1):
-        # Cloudflare uses /page/N/ pagination
-        if page == 1:
-            url = DDOS_TAG_URL
-        else:
-            url = f"{DDOS_TAG_URL}page/{page}/"
-
-        try:
-            print(f"  Page {page}...", end=" ")
-            response = requests.get(url, headers=HEADERS, timeout=15)
-            response.raise_for_status()
-
-            soup = BeautifulSoup(response.content, "html.parser")
-
-            # Find article links - Cloudflare blog structure
-            # Articles are in divs with specific classes
-            articles = soup.find_all("article") or soup.find_all("div", class_="post")
-
-            for article in articles:
-                # Find link to full article
-                link = article.find("a", href=True)
-                if link and link["href"].startswith("/"):
-                    full_url = BASE_URL + link["href"]
-                    if full_url not in article_urls:
-                        article_urls.append(full_url)
-
-            print(f"Found {len(articles)} articles")
-            time.sleep(DELAY_SECONDS)
-
-        except requests.exceptions.RequestException as e:
-            print(f"Error: {e}")
-            break
-        except Exception as e:
-            print(f"Parsing error: {e}")
-            continue
-
-    print(f"\n✓ Collected {len(article_urls)} unique article URLs\n")
-    return article_urls
-
-
-def extract_incident_narratives(article_url):
-    """
-    Extract DDoS incident descriptions from a single article
-
-    Args:
-        article_url: URL of the blog post
-
-    Returns:
-        List of incident narrative dictionaries
+    Scrape Cloudflare blog directly with better parsing
     """
     incidents = []
 
-    try:
-        response = requests.get(article_url, headers=HEADERS, timeout=15)
-        response.raise_for_status()
+    print("Scraping Cloudflare DDoS blog posts...")
 
-        soup = BeautifulSoup(response.content, "html.parser")
+    # Try multiple tag/category pages
+    urls = [
+        "https://blog.cloudflare.com/tag/ddos/",
+        "https://blog.cloudflare.com/tag/attacks/",
+        "https://blog.cloudflare.com/tag/security/",
+    ]
 
-        # Get article title
-        title = soup.find("h1")
-        title_text = title.get_text(strip=True) if title else "Unknown"
+    for base_url in urls:
+        try:
+            for page in range(1, 6):  # Try 5 pages
+                if page == 1:
+                    url = base_url
+                else:
+                    url = f"{base_url}page/{page}/"
 
-        # Get article date
-        date_elem = soup.find("time") or soup.find(
-            "meta", {"property": "article:published_time"}
-        )
-        date_text = date_elem.get("datetime", "") if date_elem else ""
+                print(f"  Fetching {url}...")
+                response = requests.get(url, headers=HEADERS, timeout=15)
 
-        # Extract main content
-        # Cloudflare blog uses article tag or specific content div
-        content_div = (
-            soup.find("article")
-            or soup.find("div", class_="post-content")
-            or soup.find("div", class_="markdown")
-        )
+                if response.status_code != 200:
+                    break
 
-        if not content_div:
-            return incidents
+                soup = BeautifulSoup(response.content, "html.parser")
 
-        # Extract paragraphs with DDoS-related content
-        paragraphs = content_div.find_all("p")
+                # Find all article cards/links
+                articles = soup.find_all(
+                    ["article", "div"], class_=re.compile("post|card|article")
+                )
 
-        for p in paragraphs:
-            text = p.get_text(strip=True)
+                if not articles:
+                    # Try alternative selectors
+                    articles = soup.find_all("a", href=re.compile("/[0-9]{4}/"))
 
-            # Filter for incident-like content
-            if len(text) < 80:  # Too short
-                continue
+                for article in articles:
+                    try:
+                        # Get article URL
+                        link = article.find("a", href=True)
+                        if not link:
+                            link = article if article.name == "a" else None
 
-            # Look for keywords indicating attack description
-            incident_indicators = [
-                "attack",
-                "ddos",
-                "traffic",
-                "mitigation",
-                "volumetric",
-                "amplification",
-                "syn flood",
-                "udp flood",
-                "http flood",
-                "botnet",
-                "requests per second",
-                "gbps",
-                "tbps",
-                "pps",
-                "targeted",
-                "overwhelmed",
-                "disrupted",
-                "outage",
-            ]
+                        if not link:
+                            continue
 
-            text_lower = text.lower()
+                        article_url = link["href"]
+                        if not article_url.startswith("http"):
+                            article_url = "https://blog.cloudflare.com" + article_url
 
-            # Check if paragraph contains incident-related keywords
-            if any(keyword in text_lower for keyword in incident_indicators):
-                # Additional filtering - avoid generic/promotional content
-                if not any(
-                    skip in text_lower
-                    for skip in ["cloudflare is", "our mission", "subscribe to"]
+                        # Check if DDoS-related
+                        if (
+                            "ddos" not in article_url.lower()
+                            and "attack" not in article_url.lower()
+                        ):
+                            continue
+
+                        print(f"    Found: {article_url}")
+
+                        # Fetch full article
+                        time.sleep(DELAY_SECONDS)
+                        article_response = requests.get(
+                            article_url, headers=HEADERS, timeout=15
+                        )
+                        article_soup = BeautifulSoup(
+                            article_response.content, "html.parser"
+                        )
+
+                        # Extract all paragraphs
+                        paragraphs = article_soup.find_all("p")
+
+                        for p in paragraphs:
+                            text = p.get_text(strip=True)
+
+                            if len(text) < 100:
+                                continue
+
+                            # Check for DDoS-related keywords
+                            keywords = [
+                                "attack",
+                                "ddos",
+                                "gbps",
+                                "requests per second",
+                                "botnet",
+                                "volumetric",
+                                "amplification",
+                                "flood",
+                                "mitigation",
+                                "traffic",
+                            ]
+
+                            if any(kw in text.lower() for kw in keywords):
+                                incidents.append(
+                                    {
+                                        "text": text,
+                                        "incident_type": "Denial of Service",
+                                        "source": "Cloudflare Blog",
+                                        "source_url": article_url,
+                                        "date": datetime.now().strftime("%Y-%m-%d"),
+                                    }
+                                )
+
+                    except Exception as e:
+                        continue
+
+                time.sleep(DELAY_SECONDS)
+
+                if len(incidents) >= max_articles:
+                    break
+
+            if len(incidents) >= max_articles:
+                break
+
+        except Exception as e:
+            print(f"  Error on {base_url}: {e}")
+            continue
+
+    print(f"  ✓ Extracted {len(incidents)} paragraphs from Cloudflare")
+    return incidents
+
+
+def scrape_arbor_reports():
+    """
+    Scrape NETSCOUT Arbor DDoS reports
+    """
+    incidents = []
+
+    print("\nScraping NETSCOUT Arbor reports...")
+
+    urls = [
+        "https://www.netscout.com/blog",
+        "https://www.netscout.com/threatreport",
+    ]
+
+    for url in urls:
+        try:
+            response = requests.get(url, headers=HEADERS, timeout=15)
+            soup = BeautifulSoup(response.content, "html.parser")
+
+            # Find all text content
+            main_content = soup.find("main") or soup.find("article") or soup
+            paragraphs = main_content.find_all("p")
+
+            for p in paragraphs:
+                text = p.get_text(strip=True)
+
+                if len(text) < 100:
+                    continue
+
+                if any(
+                    kw in text.lower() for kw in ["ddos", "attack", "gbps", "botnet"]
                 ):
                     incidents.append(
                         {
                             "text": text,
                             "incident_type": "Denial of Service",
-                            "source": "Cloudflare Blog",
-                            "source_url": article_url,
-                            "article_title": title_text,
-                            "date": date_text,
+                            "source": "NETSCOUT",
+                            "source_url": url,
+                            "date": "",
                         }
                     )
 
-    except requests.exceptions.RequestException as e:
-        print(f"    Error fetching {article_url}: {e}")
-    except Exception as e:
-        print(f"    Parsing error for {article_url}: {e}")
+            time.sleep(DELAY_SECONDS)
 
+        except Exception as e:
+            print(f"  Error: {e}")
+
+    print(f"  ✓ Extracted {len(incidents)} paragraphs from NETSCOUT")
     return incidents
 
 
-def scrape_cloudflare_ddos(max_pages=5, max_articles=50):
+def use_llm_to_generate_from_real_patterns(real_examples, target_count=500):
     """
-    Main scraping function
-
-    Args:
-        max_pages: Number of tag pages to browse
-        max_articles: Maximum number of articles to process
-
-    Returns:
-        DataFrame with DDoS incidents
+    Use Groq LLM to generate realistic incidents based on real examples
+    Only use if we have some real examples to learn from
     """
-    print("=" * 70)
-    print("CLOUDFLARE DDOS BLOG SCRAPER")
-    print("=" * 70)
-    print()
+    print(
+        f"\nUsing LLM to generate {target_count} realistic incidents from real patterns..."
+    )
 
-    # Step 1: Get article URLs
-    article_urls = get_article_urls(max_pages=max_pages)
+    try:
+        from groq import Groq
+        from dotenv import load_dotenv
 
-    # Limit to max_articles
-    article_urls = article_urls[:max_articles]
+        load_dotenv()
+        client = Groq()
 
-    print(f"Processing {len(article_urls)} articles...")
-    print()
+        # Take best real examples
+        sample_text = "\n\n".join([ex["text"][:500] for ex in real_examples[:5]])
 
-    # Step 2: Extract incidents from each article
-    all_incidents = []
+        generated = []
 
-    for idx, url in enumerate(article_urls, 1):
-        print(f"  [{idx}/{len(article_urls)}] {url.split('/')[-2][:40]}...", end=" ")
+        # Generate in batches
+        batch_size = 10
+        batches = target_count // batch_size
 
-        incidents = extract_incident_narratives(url)
-        all_incidents.extend(incidents)
+        for batch in range(batches):
+            prompt = f"""You are generating realistic DDoS incident descriptions for a security dataset.
 
-        print(f"→ {len(incidents)} narratives")
+Based on these REAL examples from industry reports:
 
-        # Be respectful with delays
-        if idx < len(article_urls):
-            time.sleep(DELAY_SECONDS)
+{sample_text}
 
-    # Step 3: Create DataFrame
-    df = pd.DataFrame(all_incidents)
+Generate {batch_size} NEW, unique DDoS incident descriptions. Each should:
+- Be 150-300 words
+- Include specific metrics (Gbps, RPS, PPS)
+- Mention attack vectors (UDP flood, SYN flood, amplification, etc.)
+- Describe detection and impact
+- Use professional security analyst language
+- Be DIFFERENT from the examples
 
-    if len(df) == 0:
-        print("\n⚠️  No incidents extracted. The blog structure may have changed.")
-        return df
+Format: Return ONLY the incident descriptions, separated by "---INCIDENT---"
 
-    # Remove duplicates
-    initial_len = len(df)
-    df = df.drop_duplicates(subset=["text"])
+Generate {batch_size} incidents now:"""
 
-    print()
-    print("=" * 70)
-    print("EXTRACTION SUMMARY")
-    print("=" * 70)
-    print(f"Articles processed: {len(article_urls)}")
-    print(f"Narratives extracted: {initial_len}")
-    print(f"After deduplication: {len(df)}")
-    print()
+            try:
+                response = client.chat.completions.create(
+                    model="openai/gpt-oss-120b",  # Better model for quality
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.9,  # High creativity
+                    max_tokens=4000,
+                )
 
-    # Show text length distribution
-    if len(df) > 0:
-        text_lengths = df["text"].str.len()
-        print(f"Text length statistics:")
-        print(f"  Mean: {text_lengths.mean():.0f} characters")
-        print(f"  Median: {text_lengths.median():.0f} characters")
-        print(f"  Min: {text_lengths.min():.0f} characters")
-        print(f"  Max: {text_lengths.max():.0f} characters")
+                content = response.choices[0].message.content
 
-    return df
+                # Split by separator
+                descriptions = content.split("---INCIDENT---")
 
+                for desc in descriptions:
+                    desc = desc.strip()
+                    if len(desc) > 100:
+                        generated.append(
+                            {
+                                "text": desc,
+                                "incident_type": "Denial of Service",
+                                "source": "LLM-Enhanced (from real patterns)",
+                                "source_url": "",
+                                "date": "",
+                            }
+                        )
 
-def save_dataset(df, output_path=OUTPUT_PATH):
-    """
-    Save extracted incidents to CSV
+                print(f"  Generated batch {batch + 1}/{batches}")
+                time.sleep(1)  # API rate limit
 
-    Args:
-        df: DataFrame with incidents
-        output_path: Where to save
-    """
-    if len(df) == 0:
-        print("\n⚠️  No data to save")
-        return
+            except Exception as e:
+                print(f"  Error in batch {batch}: {e}")
+                continue
 
-    # Create output directory
-    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        print(f"  ✓ Generated {len(generated)} LLM-based incidents")
+        return generated
 
-    # Save
-    df.to_csv(output_path, index=False)
-
-    print()
-    print("=" * 70)
-    print(f"✓ Saved {len(df)} incidents to: {output_path}")
-    print("=" * 70)
-
-    # Show samples
-    print("\nSample incidents:")
-    print("-" * 70)
-
-    for idx, row in df.head(3).iterrows():
-        print(f"\n{idx + 1}. From: {row['article_title'][:60]}...")
-        print(f"   {row['text'][:200]}...")
-        print()
-
-
-def enhance_with_synthetic(df, target_count=500):
-    """
-    If we didn't get enough real incidents, supplement with enhanced synthetic
-
-    Args:
-        df: Existing incidents DataFrame
-        target_count: Desired total incidents
-
-    Returns:
-        Enhanced DataFrame
-    """
-    current_count = len(df)
-
-    if current_count >= target_count:
-        print(f"\n✓ Have {current_count} incidents, no synthesis needed")
-        return df
-
-    needed = target_count - current_count
-    print(f"\nGenerating {needed} synthetic incidents to reach {target_count}...")
-
-    # Use patterns from real incidents to generate realistic ones
-    templates = [
-        "Network operations center detected traffic spike reaching {volume} Gbps targeting web infrastructure, identified as {attack_type} attack originating from {source}.",
-        "Application layer attack observed with {rps} requests per second overwhelming {target}, legitimate users experienced {impact}.",
-        "DNS infrastructure targeted by amplification attack generating {qps} queries per second using {vector}, causing {duration} service degradation.",
-        "Volumetric attack detected against {asset} infrastructure, {protocol} flood consumed {bandwidth} of available capacity, mitigation activated.",
-        "Multi-vector DDoS campaign identified targeting {services}, combining {vector1} and {vector2} attacks, peak traffic reached {volume}.",
-        "Layer {layer} attack detected exploiting {vulnerability}, {count} malicious connections established, emergency traffic filtering engaged.",
-        "Botnet-sourced attack overwhelmed edge routers with {pps} packets per second, {attack_type} flood blocked legitimate traffic for {duration}.",
-        "Reflection attack leveraged {protocol} to amplify traffic by {factor}x, targeting {asset} with {volume} aggregate bandwidth.",
-        "Application-specific attack targeted {endpoint} with {technique}, degraded response times to {latency}, affecting {users} concurrent users.",
-    ]
-
-    import random
-
-    attack_types = [
-        "volumetric DDoS",
-        "SYN flood",
-        "UDP amplification",
-        "HTTP flood",
-        "DNS flood",
-        "NTP amplification",
-    ]
-    protocols = ["UDP", "TCP", "ICMP", "DNS", "NTP", "SSDP", "memcached"]
-    sources = [
-        "distributed botnet",
-        "compromised IoT devices",
-        "geographically dispersed sources",
-        "cloud-based infrastructure",
-    ]
-    targets = [
-        "customer-facing API",
-        "authentication service",
-        "content delivery network",
-        "public DNS resolvers",
-    ]
-    services = ["web services", "API endpoints", "email infrastructure", "VoIP systems"]
-    assets = ["edge", "core network", "customer", "public-facing"]
-    endpoints = [
-        "login endpoint",
-        "/api/v1/auth",
-        "checkout process",
-        "search functionality",
-    ]
-    techniques = [
-        "slowloris",
-        "request flooding",
-        "cache bypass",
-        "resource exhaustion",
-    ]
-
-    synthetic_incidents = []
-
-    for _ in range(needed):
-        template = random.choice(templates)
-
-        text = template.format(
-            volume=f"{random.randint(50, 800)}",
-            attack_type=random.choice(attack_types),
-            source=random.choice(sources),
-            rps=f"{random.randint(100, 500)}K",
-            target=random.choice(targets),
-            impact=random.choice(
-                [
-                    "severe degradation",
-                    "complete service disruption",
-                    "intermittent timeouts",
-                    "elevated error rates",
-                ]
-            ),
-            qps=f"{random.randint(10, 200)}M",
-            vector=random.choice(protocols) + " reflection",
-            duration=f"{random.randint(1, 8)} hours",
-            asset=random.choice(assets),
-            protocol=random.choice(protocols),
-            bandwidth=f"{random.randint(60, 95)}%",
-            services=random.choice(services),
-            vector1=random.choice(attack_types),
-            vector2=random.choice(attack_types),
-            layer=random.choice(["3", "4", "7"]),
-            vulnerability=random.choice(
-                [
-                    "keep-alive exhaustion",
-                    "connection pool depletion",
-                    "regex DoS",
-                    "cache poisoning",
-                ]
-            ),
-            count=f"{random.randint(10, 500)}K",
-            pps=f"{random.randint(10, 200)}M",
-            factor=random.randint(10, 100),
-            endpoint=random.choice(endpoints),
-            technique=random.choice(techniques),
-            latency=f"{random.randint(5, 30)} seconds",
-            users=f"{random.randint(1, 50)}K",
-        )
-
-        synthetic_incidents.append(
-            {
-                "text": text,
-                "incident_type": "Denial of Service",
-                "source": "Synthetic-Enhanced",
-                "source_url": "",
-                "article_title": "Generated",
-                "date": "",
-            }
-        )
-
-    synthetic_df = pd.DataFrame(synthetic_incidents)
-    combined = pd.concat([df, synthetic_df], ignore_index=True)
-
-    print(f"✓ Added {needed} synthetic incidents")
-    print(f"  Total: {len(combined)} DDoS incidents")
-
-    return combined
+    except Exception as e:
+        print(f"  ✗ LLM generation failed: {e}")
+        return []
 
 
 def main():
-    """
-    Main execution
-    """
-    # Scrape Cloudflare blog
-    df = scrape_cloudflare_ddos(max_pages=3, max_articles=30)
+    print("=" * 70)
+    print("ENHANCED DDOS INCIDENT COLLECTOR")
+    print("Goal: 3000 high-quality incidents")
+    print("=" * 70)
+    print()
 
-    # Enhance with synthetic if needed
-    df = enhance_with_synthetic(df, target_count=500)
+    all_incidents = []
+
+    # Phase 1: Intensive web scraping
+    print("PHASE 1: Web Scraping")
+    print("-" * 70)
+
+    all_incidents.extend(scrape_cloudflare_blog_direct(max_articles=200))
+    all_incidents.extend(scrape_arbor_reports())
+
+    # Remove duplicates
+    df = pd.DataFrame(all_incidents)
+    df = df.drop_duplicates(subset=["text"])
+
+    real_count = len(df)
+    print(f"\n✓ Total real incidents scraped: {real_count}")
+
+    # Phase 2: LLM generation if needed
+    if real_count < 3000:
+        needed = 3000 - real_count
+        print(f"\nPHASE 2: LLM-Enhanced Generation")
+        print("-" * 70)
+        print(f"Need {needed} more incidents to reach 3000")
+
+        if real_count > 0:
+            # Use real examples as templates
+            llm_incidents = use_llm_to_generate_from_real_patterns(
+                all_incidents[:20],  # Use best 20 examples
+                target_count=needed,
+            )
+
+            if llm_incidents:
+                all_incidents.extend(llm_incidents)
+                df = pd.DataFrame(all_incidents)
+                df = df.drop_duplicates(subset=["text"])
+
+    # Final statistics
+    print("\n" + "=" * 70)
+    print("COLLECTION COMPLETE")
+    print("=" * 70)
+    print(f"\nTotal incidents: {len(df)}")
+    print("\nSource breakdown:")
+    print(df["source"].value_counts())
+
+    # Text quality check
+    print("\nQuality metrics:")
+    lengths = df["text"].str.len()
+    print(f"  Mean length: {lengths.mean():.0f} chars")
+    print(f"  Median length: {lengths.median():.0f} chars")
 
     # Save
-    save_dataset(df)
+    Path(OUTPUT_PATH).parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(OUTPUT_PATH, index=False)
 
-    print("\n✓ DDoS incident collection complete!")
-    print("\nNext steps:")
-    print("  1. Review the output file")
-    print("  2. Merge with other datasets:")
-    print("     python merge_all_datasets.py")
-    print("  3. Retrain models")
+    print(f"\n✓ Saved to: {OUTPUT_PATH}")
+
+    # Show samples
+    print("\n" + "=" * 70)
+    print("SAMPLE INCIDENTS")
+    print("=" * 70)
+
+    for idx, row in df.head(3).iterrows():
+        print(f"\n{idx + 1}. [{row['source']}]")
+        print(f"   {row['text'][:300]}...")
+
+    return df
 
 
 if __name__ == "__main__":

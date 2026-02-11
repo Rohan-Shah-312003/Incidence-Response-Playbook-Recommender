@@ -1,0 +1,30 @@
+======================================================================
+DATASET SUMMARY REPORT
+======================================================================
+
+Generated: 2026-02-10 16:46:11.404193
+
+Total incidents: 18000
+Number of classes: 6
+
+Class Distribution:
+  Data Breach         : 3000 ( 16.7%)
+  Insider Misuse      : 3000 ( 16.7%)
+  Malware             : 3000 ( 16.7%)
+  Denial of Service   : 3000 ( 16.7%)
+  Ransomware          : 3000 ( 16.7%)
+  Phishing            : 3000 ( 16.7%)
+
+Text Statistics:
+  Mean length:     1386 chars
+  Median length:    364 chars
+  Min length:        50 chars
+  Max length:    516902 chars
+
+Data Sources:
+  VERIS                    : 7117 ( 39.5%)
+  ENRON                    : 4547 ( 25.3%)
+  CERT                     : 4181 ( 23.2%)
+  Cloudflare Blog          : 2059 ( 11.4%)
+  LLM-Enhanced (from real patterns):   80 (  0.4%)
+  NETSCOUT                 :   16 (  0.1%)

@@ -9,3 +9,7 @@ models/
 .env
 node_modules/
 package-lock.json
+raw/
+scraped_incidents/
+veris_raw/
+real_incidents_expanded.csv

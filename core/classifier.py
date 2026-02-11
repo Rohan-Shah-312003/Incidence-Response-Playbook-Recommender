@@ -6,7 +6,7 @@ import joblib
 from pathlib import Path
 
 # Try to load enhanced model first, fall back to old model
-MODEL_PATH = Path("models/enhanced_tfidf")
+MODEL_PATH = Path("models/enhanced_tfidf_ensemble")
 OLD_MODEL_PATH = "models/classifier.pkl"
 OLD_VECTORIZER_PATH = "models/tfidf.pkl"
 

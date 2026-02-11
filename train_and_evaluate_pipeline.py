@@ -163,7 +163,7 @@ class ComprehensiveEvaluator:
 
         # BERT (optional - commented out by default as it's slow)
         # Uncomment below to also train BERT model
-        """
+        
         print("2. Training BERT Model...")
         print("   This will take 15-30 minutes...")
         print("   Using: distilbert-base-uncased")
@@ -173,7 +173,10 @@ class ComprehensiveEvaluator:
         bert_model.fit(X_train, y_train)
         models['bert'] = bert_model
         print("✓ BERT Complete\n")
-        """
+
+        print("=" * 60)
+        print("MODELS TRAINED")
+        print("=" * 60 + "\n")
 
         return models
 
@@ -407,7 +410,7 @@ class ComprehensiveEvaluator:
 
 
 def full_training_pipeline(
-    data_path="./data/real_incidents_expanded.csv", output_dir="./evaluation_results"
+    data_path="./data/real_incidents_balanced.csv", output_dir="./evaluation_results"
 ):
     """
     Complete training and evaluation pipeline
@@ -478,8 +481,8 @@ def full_training_pipeline(
 if __name__ == "__main__":
     # Determine which data file to use
     data_paths = [
-        "./data/real_incidents_expanded.csv",  # Preferred (6 types)
-        "../../data/real_incidents_expanded.csv",
+        "./data/real_incidents_balanced.csv",  # Preferred (6 types)
+        "../../data/real_incidents_balanced.csv",
         "./data/real_incidents_balanced.csv",  # Fallback (3 types)
         "../../data/real_incidents_balanced.csv",
     ]
@@ -544,3 +547,10 @@ if __name__ == "__main__":
                 )
         except Exception as e:
             print(f"⚠️  Could not load model for testing: {e}")
+
+
+# At the end of train_and_evaluate_pipeline.py
+# from generate_plots_integrated import plot_all_visualizations
+
+# # After training
+# plot_all_visualizations(models, X_test, y_test)

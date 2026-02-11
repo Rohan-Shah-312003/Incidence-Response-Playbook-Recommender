@@ -11,10 +11,6 @@ import pandas as pd
 from pathlib import Path
 import re
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-ROOT_DIR = SCRIPT_DIR.parent.parent
-
-
 # VERIS GitHub repository
 VERIS_BASE_URL = (
     "https://raw.githubusercontent.com/vz-risk/VCDB/master/data/json/validated/"
@@ -37,7 +33,7 @@ def download_veris_incidents(output_dir="./data/veris_raw"):
     print("   git clone https://github.com/vz-risk/VCDB.git")
     print("\n2. Download the latest release:")
     print("   https://github.com/vz-risk/VCDB/releases")
-    print("\nAfter downloading, place JSON files in:", output_path)
+    print("\nAfter downloading, VCDB will be in the project root.")
 
     return output_path
 
@@ -123,7 +119,7 @@ def classify_veris_incident(incident_json):
     return None
 
 
-def process_veris_directory(veris_dir="./VCDB/data/json/validated"):
+def process_veris_directory(veris_dir="VCDB/data/json/validated"):
     """
     Process all VERIS JSON files and extract incident descriptions
 
@@ -133,12 +129,18 @@ def process_veris_directory(veris_dir="./VCDB/data/json/validated"):
     Returns:
         DataFrame with text and incident_type columns
     """
+
     veris_path = Path(veris_dir)
 
     if not veris_path.exists():
         print(f"Error: VERIS directory not found at {veris_path}")
         print("Please clone the repository first:")
         print("  git clone https://github.com/vz-risk/VCDB.git")
+        print("\nExpected structure:")
+        print("  IRPR/")
+        print("  ├── VCDB/")
+        print("  │   └── data/json/validated/  ← JSON files here")
+        print("  └── data/")
         return None
 
     incidents = []
@@ -180,7 +182,7 @@ def process_veris_directory(veris_dir="./VCDB/data/json/validated"):
     return df
 
 
-def save_processed_veris(output_path="./data/veris_processed/veris_incidents.csv"):
+def save_processed_veris(output_path="data/veris_raw/veris_incidents.csv"):
     """
     Main function to process and save VERIS data
     """

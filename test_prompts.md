@@ -1,31 +1,23 @@
-**Prompt** - During routine SOC monitoring, multiple failed and successful authentication attempts were detected on a critical file server at approximately 12:30 AM, well outside standard business hours. The activity originated from a valid internal employee account that does not have authorized access to this server based on current RBAC policies.
+### 1. Malware
 
-Following the authentication attempts, anomalous log entries were generated indicating directory enumeration and access to multiple sensitive folders, including restricted financial and HR data paths. No scheduled maintenance, backup operations, batch jobs, or approved change requests were planned during this timeframe.
+Automated endpoint alerts flagged a suspicious execution of `certutil.exe` on a workstation in the Engineering department, which was used to download a binary from an unidentified external IP. The process subsequently attempted to inject code into `explorer.exe` and established a persistent outbound connection via port 443. No authorized software updates or developer activities were scheduled for this host, indicating a high probability of a live Trojan infection and active command-and-control (C2) beaconing.
 
-The timing, access pattern, and deviation from the user’s historical behavior suggest potential account compromise or insider misuse, requiring immediate investigation.
+### 2. Insider Misuse
 
-**Prompt** - During routine monitoring, the SOC team observed repeated authentication attempts on a file server at approximately 12:30 AM, outside normal business hours. The attempts originated from a valid internal user account that is not authorized to access the server. Shortly after, several unusual log entries were generated indicating access to sensitive directories. No scheduled maintenance or automated jobs were planned at this time.
+A Junior Administrator was observed using a domain admin service account to perform recursive directory searches on a restricted "Legal_Counsel" file share. Logs indicate the user attempted to bypass standard RBAC by temporarily adding their personal account to a high-privilege security group during a period of low staffing. This activity does not align with any open support tickets or documented infrastructure maintenance, suggesting intentional privilege escalation for unauthorized data access.
 
-**Prompt** - An employee reported receiving an urgent email late at night claiming to be from the internal IT support team, warning of immediate account suspension unless password verification was completed. The email contained a hyperlink redirecting to an external website closely mimicking the corporate login portal, including similar branding and layout.
+### 3. Data Breach --> is giving malware as o/p
 
-Shortly after the report, multiple failed authentication attempts were observed on the employee’s account from unrecognized IP addresses, followed by account lockout triggers. No legitimate IT communications or password reset campaigns were active at the time.
+Security monitoring detected a massive spike in outbound HTTPS traffic from a production database server to an unfamiliar cloud storage bucket. Initial analysis confirms the exfiltration of approximately 50,000 records containing customer PII, including names and encrypted tax IDs, via a compromised API key. There were no approved data migrations or integration tests active during this window, representing a confirmed breach of sensitive organizational data.
 
-The incident indicates a likely phishing-based credential harvesting attempt, with subsequent unauthorized login activity, posing a risk of lateral movement and broader account compromise.
+### 4. Phishing
 
-**Prompt** - Automated security alerts flagged unusual outbound data transfers originating from a production database server during early morning hours, a period when the system is typically idle. The data was transmitted to an unfamiliar external IP address not previously observed in baseline traffic patterns.
+An employee reported a "Security Alert" email that requested an urgent password update via a link to a cloned corporate login page. Shortly after the email was opened, multiple failed login attempts were recorded for that user from a geo-location inconsistent with their current travel status, eventually triggering an account lockout. The event demonstrates a successful credential harvesting attempt with subsequent unauthorized access efforts.
 
-Initial analysis shows that the transfers were initiated using a service account with elevated administrative privileges, capable of accessing large volumes of sensitive data. No approved configuration changes, data exports, integrations, or maintenance activities were documented prior to or during this timeframe.
+### 5. Ransomware
 
-The combination of after-hours activity, external data transfer, and privileged account usage raises concerns of potential data exfiltration due to account compromise or malicious insider activity.
+System monitors on a core file server alerted to a sudden, high-frequency rename of files to a `.crypt` extension and the mass deletion of Volume Shadow Copies. A text-based ransom note was deposited in every affected directory, providing instructions for decryption via a dark-web portal. The rapid encryption of shared drives and the disabling of local recovery points indicate an active, automated ransomware deployment requiring immediate isolation.
 
-**Prompt** - Unrecognized authentication attempts were detected on an internal application server after midnight, followed by successful logins and access to sensitive files, all performed using a valid employee account. The activity occurred outside normal working hours and does not align with the employee’s assigned role or historical access patterns.
+### 6. DoS
 
-No scheduled tasks, approved maintenance windows, or emergency support activities were planned at the time. File access logs indicate interaction with restricted directories that are not required for the user’s job function.
-
-This behavior suggests possible credential compromise or misuse of legitimate access, warranting further validation and containment actions.
-
-**Prompt** - During continuous security monitoring, repeated authentication attempts were observed on a file server at approximately 12:30 AM. The attempts originated from a valid internal user account, followed by access to sensitive directories containing confidential organizational data.
-
-The activity occurred outside standard business hours and deviates from the user’s normal login times and access scope. No approved operational tasks or automated processes were scheduled to run under this account during the observed window.
-
-The pattern indicates anomalous use of legitimate credentials, potentially signaling account compromise, privilege abuse, or early-stage insider threat activity.
+The external-facing web portal became unresponsive following a surge of specialized HTTP POST requests designed to exhaust the application's database connection pool. Traffic analysis shows the requests originated from a globally distributed botnet, bypassing standard volumetric firewalls by targeting specific resource-heavy application functions. No legitimate traffic spikes or marketing events were planned, confirming a targeted Layer 7 Denial of Service attack.

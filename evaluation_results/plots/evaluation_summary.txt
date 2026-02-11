@@ -1,0 +1,55 @@
+================================================================================
+INCIDENT RESPONSE MODEL - EVALUATION SUMMARY
+================================================================================
+
+Generated: 2026-02-11 12:33:03.794576
+Total predictions: 3600
+
+Overall Accuracy: 0.9683 (96.83%)
+
+================================================================================
+PER-CLASS PERFORMANCE
+================================================================================
+
+Class                Precision    Recall       F1-Score     Support   
+--------------------------------------------------------------------------------
+Data Breach          0.9379       0.9067       0.9220       600       
+Denial of Service    0.9983       1.0000       0.9992       600       
+Insider Misuse       0.9694       0.9517       0.9605       600       
+Malware              0.9740       0.9983       0.9860       600       
+Phishing             0.9362       0.9533       0.9447       600       
+Ransomware           0.9934       1.0000       0.9967       600       
+
+================================================================================
+CONFIDENCE ANALYSIS
+================================================================================
+
+Overall confidence statistics:
+  Mean:   0.9048
+  Median: 0.9501
+  Std:    0.1157
+  Min:    0.2565
+  Max:    0.9997
+
+Confidence by correctness:
+  Correct predictions:   0.9138
+  Incorrect predictions: 0.6298
+  Separation:            0.2840
+
+================================================================================
+ERROR ANALYSIS
+================================================================================
+
+Total errors: 114 (3.17%)
+
+Most common misclassifications:
+  Data Breach → Phishing: 29 (25.4% of errors)
+  Phishing → Data Breach: 25 (21.9% of errors)
+  Data Breach → Insider Misuse: 17 (14.9% of errors)
+  Insider Misuse → Data Breach: 11 (9.6% of errors)
+  Insider Misuse → Phishing: 10 (8.8% of errors)
+  Data Breach → Malware: 9 (7.9% of errors)
+  Insider Misuse → Malware: 6 (5.3% of errors)
+  Data Breach → Ransomware: 1 (0.9% of errors)
+  Insider Misuse → Denial of Service: 1 (0.9% of errors)
+  Insider Misuse → Ransomware: 1 (0.9% of errors)

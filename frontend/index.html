@@ -14,11 +14,30 @@
 		<script src="renderer.js"></script>
 	</head>
 	<body>
-		<div class="app-shell">
-			<nav class="side-nav">
-				<div class="logo">🛡️<span>IRPR</span></div>
-			</nav>
+		<div id="title-bar" class="dark-theme">
+			<!-- Spacer for traffic lights - must be first and transparent -->
+			<div class="mac-traffic-lights-spacer"></div>
 
+			<!-- App identifier -->
+			<div class="title-section left">
+				<div class="app-id">
+					<span class="app-name-label">IRPR Intelligence Engine</span>
+				</div>
+			</div>
+
+			<!-- Center - draggable area with session title -->
+			<div id="drag-region">
+				<span class="session-title"></span>
+			</div>
+
+			<!-- Right side buttons -->
+			<div class="title-section right">
+				<button class="title-bar-btn" onclick="exportReport()">
+					Export PDF
+				</button>
+			</div>
+		</div>
+		<div class="app-shell">
 			<main class="main-content">
 				<header class="hero-header">
 					<div class="header-text">
@@ -27,11 +46,6 @@
 							<span class="accent-text">& Playbook Recommender</span>
 						</h1>
 						<p>AI-Powered Forensic Analysis & Remediation Strategy</p>
-					</div>
-					<div class="header-actions">
-						<button class="export-btn analyze-btn" onclick="exportReport()">
-							<span>Download PDF Report</span>
-						</button>
 					</div>
 				</header>
 
@@ -94,7 +108,10 @@
 										id="overrideNote"
 										placeholder="Log manual adjustments here..."
 									></textarea>
-									<button class="ghost-btn analyze-btn" onclick="submitOverride()">
+									<button
+										class="ghost-btn analyze-btn"
+										onclick="submitOverride()"
+									>
 										Commit Changes
 									</button>
 								</div>
@@ -106,5 +123,18 @@
 				</div>
 			</main>
 		</div>
+		<script>
+			var title = document.querySelector(".session-title");
+			title.textContent =
+				"IRPR Session - " +
+				new Intl.DateTimeFormat("default", {
+					year: "numeric",
+					month: "2-digit",
+					day: "2-digit",
+					hour: "2-digit",
+					minute: "2-digit",
+					second: "2-digit",
+				}).format(new Date());
+		</script>
 	</body>
 </html>

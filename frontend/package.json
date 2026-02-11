@@ -1,6 +1,16 @@
 {
   "name": "frontend",
   "version": "1.0.0",
+  "build": {
+    "appId": "com.irpr.intelligence",
+    "mac": {
+      "icon": "logo.icns",
+      "category": "public.app-category.developer-tools"
+    },
+    "win": {
+      "icon": "logo.ico"
+    }
+  },
   "description": "",
   "main": "index.js",
   "scripts": {
